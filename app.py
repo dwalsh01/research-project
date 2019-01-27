@@ -7,7 +7,6 @@ dotenv_path = os.path.join(APP_ROOT, '.env')
 load_dotenv(dotenv_path)
 
 app = Flask(__name__, static_folder='research-react/build')
-# app.config.from_object(os.environ['APP_SETTINGS'])
 
 sampleData = [
     {"grant_id": 0, "grant_title": 'Sample title 1'},
