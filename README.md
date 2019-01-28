@@ -12,6 +12,7 @@
 
    ```bash
        git clone https://github.com/dwalsh01/research-project.git
+       cd research-project/
    ```
 
 2. You must then activate the virtual environment:
