@@ -23,6 +23,10 @@ class Users(db.Model):
         self.email = email
         self.orcid = orcid
 
+    def saveToDB(self):
+        db.session.add(self)
+        db.session.commit()
+
     def __repr__(self):
         return "<User: {}>".format(self.f_name)
 
