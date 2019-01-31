@@ -24,6 +24,7 @@ htmlcov/
 .coverage.*
 *,cover
 # dependencies
+/venv
 /node_modules
 /.pnp
 .pnp.js
