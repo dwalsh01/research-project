@@ -1,6 +1,6 @@
-from app import db
-from passlib.hash import sha256_crypt
-from flask_login import UserMixin
+from flask_sqlalchemy import Model, SQLAlchemy
+
+db = SQLAlchemy()
 
 def dump_datetime(value):
     """Deserialize datetime object into string form for JSON processing."""
@@ -77,62 +77,4 @@ class Education(db.Model):
     field_of_study = db.Column(db.String(30), nullable=False)
     institution = db.Column(db.String(25))
     location = db.Column(db.String(50))
-    year_degree_award = db.Column(db.DateTime)
-
-    def saveToDB(self):
-        db.session.add(self)
-        db.session.commit()
-
-class Employment(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    institution = db.Column(db.String(50))
-    location = db.Column(db.String(100))
-    years = db.Column(db.Float)
-
-    def saveToDB(self):
-        db.session.add(self)
-        db.session.commit()
-
-class Societies(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    start_date = db.Column(db.DateTime)
-    end_date = db.Column(db.DateTime)
-    society_name = db.Column(db.String(50))
-    membership_type = db.Column(db.Boolean)
-
-    def saveToDB(self):
-        db.session.add(self)
-        db.session.commit()
-
-class Awards(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    year = db.Column(db.Integer)
-    awarding_body = db.Column(db.String(50))
-    award_details = db.Column(db.String(100))
-
-    def saveToDB(self):
-            db.session.add(self)
-            db.session.commit()
-
-class Funding(db.Model):
-    id = db.Column(db.Integer, primary_key= True, unique=True, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    start_date = db.Column(db.DateTime)
-    end_date = db.Column(db.DateTime)
-    funding_amt = db.Column(db.Float)
-    funding_body = db.Column(db.String(50))
-    programme = db.Column(db.String(50))
-    status = db.Column(db.Boolean)
-
-
-class Teams(db.Model):
-    id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
-    person_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    start_date = db.Column(db.DateTime)
-    end_date = db.Column(db.DateTime)
-    name = db.Column(db.String(50))
-    position = db.Column(db.String(50))
-    primary_attribution = db.Column(db.Integer, db.ForeignKey('funding.id'), nullable=False)
+    year_degree_award = db.Column(db.Integer)

@@ -1,79 +1,66 @@
-import os
-from flask import Flask, send_from_directory, jsonify, request, redirect, url_for
+from os import getcwd, getenv
+import os.path
+
 from dotenv import load_dotenv
-from flask import jsonify
+from flask import Flask, send_from_directory, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
-from passlib.hash import sha256_crypt
-from flask_login import login_required, LoginManager, login_required, login_user, logout_user, current_user
 
-APP_ROOT = os.path.join(os.path.dirname(__file__), '..')
-dotenv_path = os.path.join(APP_ROOT, '.env')
-load_dotenv(dotenv_path)
+def app_factory():
+    ''' Initialises the app.
 
-app = Flask(__name__, static_folder='research-react/build')
+    `cwd` is a bit finicky at the moment.
+    (If running normally, it will point to
+    the parent directory of this file.
+    '''
 
-app.secret_key = os.environ['SECRET']
+    # Load environment variables
+    cwd = getcwd()
+    env_path = os.path.join(cwd, ".env")
+    load_dotenv(env_path, verbose=True)
 
-app.config.from_object(os.environ['APP_SETTINGS'])
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
-login_manager = LoginManager()
-login_manager.init_app(app)
 
-from models import Users, Education
+    app = Flask(__name__, static_folder="research-react/build", root_path=cwd)
 
-@login_manager.user_loader
-def user_loader(user_id):
-    return Users.query.get(user_id)
+    # Configure app
+    app.config.from_object(getenv('APP_SETTINGS', 'config.Config'))
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-sampleData = [
-    {"grant_id": 0, "grant_title": 'Sample title 1'},
-    {"grant_id": 1, "grant_title": 'Sample title 2'},
-    {"grant_id": 2, "grant_title": 'Sample title 3'}
- ]
 
-# Serve React App
-@app.route('/', defaults={'path': ''})
-@app.route('/<path:path>')
-def serve(path):
-    if path != "" and os.path.exists("research-react/build/" + path):
-        return send_from_directory('research-react/build', path)
-    else:
-        return send_from_directory('research-react/build', 'index.html')
+    # Import and initialise SQLAlchemy
+    from . import models
 
-@app.route('/testing', methods=['GET'])
-def testing():
-    if request.method == 'GET':
-        return jsonify(sampleData)
+    models.db.init_app(app)
 
-@app.route('/insert_user')
-def insert_user():
-    me = Users("matthew", "walsh", "student", "mr", "ltd", "pbkdf2sha256", "252", "mw11@test.com", "password", "131223")
-    me.saveToDB()
-    return redirect(url_for("serve"))
 
-@app.route('/login_user' , methods=['POST'])
-def login():
-    content = request.get_json()
-    user = Users.query.filter_by(email=content['email']).first()
-    if user:
-        if sha256_crypt.verify(content['password'], user.password):
-            login_user(user, remember=True)
-            return jsonify(user.serialize), 200
+
+    sampleData = [
+        {"grant_id": 0, "grant_title": 'Sample title 1'},
+        {"grant_id": 1, "grant_title": 'Sample title 2'},
+        {"grant_id": 2, "grant_title": 'Sample title 3'}
+     ]
+
+
+    # Serve React App
+    @app.route('/', defaults={'path': ''})
+    @app.route('/<path:path>')
+    def serve(path):
+        if path != "" and os.path.exists("research-react/build/" + path):
+            return send_from_directory('research-react/build', path)
         else:
-            return '', 400
+            return send_from_directory('research-react/build', 'index.html')
 
-@app.route("/logout")
-@login_required
-def logout():
-    logout_user()
-    return redirect(url_for(serve))
+    @app.route('/testing', methods=['GET'])
+    def testing():
+        if request.method == 'GET':
+            return jsonify(sampleData)
 
-@app.route('/current')
-def current():
-    if current_user.is_authenticated:
-        return jsonify(current_user.serialize)
-    return jsonify({"user": "False"}), 200
+    @app.route('/insert_user')
+    def insert_user():
+        me = models.Users("moyra", "walsh","staff", "mrs. ", "phd", "12313123", 445, "moyra@gmail.com", "asdaf1")
+        models.db.session.add(me)
+        models.db.session.commit()
+        res = models.Users.query.filter_by(f_name='daragh').first()
+        return str(res.f_name)
 
-if __name__ == '__main__':
-    app.run()
+
+    return app
