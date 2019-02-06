@@ -10,7 +10,7 @@ def app_factory():
 
     `cwd` is a bit finicky at the moment.
     (If running normally, it will point to
-    the parent directory of this file.
+    the parent directory of this file).
     '''
 
     # Load environment variables
@@ -31,36 +31,24 @@ def app_factory():
 
     models.db.init_app(app)
 
+    # Add db to app configuration
+    # (Exposes it to blueprints)
 
+    app.config['DATABASE_OBJ'] = models.db
 
-    sampleData = [
-        {"grant_id": 0, "grant_title": 'Sample title 1'},
-        {"grant_id": 1, "grant_title": 'Sample title 2'},
-        {"grant_id": 2, "grant_title": 'Sample title 3'}
-     ]
-
+    # Register playground routes
+    from . import playground
+    app.register_blueprint(playground.bp)
 
     # Serve React App
     @app.route('/', defaults={'path': ''})
     @app.route('/<path:path>')
     def serve(path):
-        if path != "" and os.path.exists("research-react/build/" + path):
-            return send_from_directory('research-react/build', path)
+        build = 'research-react/build'
+        if path != "" and os.path.exists(f'{build}/{path}'):
+            return send_from_directory(build, path)
         else:
-            return send_from_directory('research-react/build', 'index.html')
-
-    @app.route('/testing', methods=['GET'])
-    def testing():
-        if request.method == 'GET':
-            return jsonify(sampleData)
-
-    @app.route('/insert_user')
-    def insert_user():
-        me = models.Users("moyra", "walsh","staff", "mrs. ", "phd", "12313123", 445, "moyra@gmail.com", "asdaf1")
-        models.db.session.add(me)
-        models.db.session.commit()
-        res = models.Users.query.filter_by(f_name='daragh').first()
-        return str(res.f_name)
+            return send_from_directory(build, 'index.html')
 
 
     return app
