@@ -6,6 +6,25 @@
 2. Increase our understanding of software engineering practices and procedures.
 3. Learn about new frameworks and improve our understanding of technology we are familiar with.
 
+
+
+## Running the app
+
+1. Source the .env file
+
+    ```bash
+        source .env
+    ```
+
+2.  Activate your venv
+
+3. Run flask
+    ```bash
+        flask run
+    ```
+
+
+
 ## Installation guide
 
 1. Download & Install python/git/npm (if you haven't already)
