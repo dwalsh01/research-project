@@ -12,7 +12,7 @@ load_dotenv(dotenv_path)
 
 app = Flask(__name__, static_folder='research-react/build')
 
-app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
+app.secret_key = os.environ['SECRET']
 
 app.config.from_object(os.environ['APP_SETTINGS'])
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
