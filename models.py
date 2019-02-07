@@ -45,6 +45,7 @@ class Users(UserMixin, db.Model):
     def serialize(self):
        """Return object data in easily serializeable format"""
        return {
+           "id": self.id,
            "f_name": self.f_name,
            "l_name": self.l_name,
            "job_title": self.job_title,

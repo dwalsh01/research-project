@@ -52,26 +52,28 @@ def insert_user():
     me.saveToDB()
     return redirect(url_for("serve"))
 
-@app.route('/login_user' , methods=['GET', 'POST'])
+@app.route('/login_user' , methods=['POST'])
 def login():
     content = request.get_json()
     user = Users.query.filter_by(email=content['email']).first()
     if user:
         if sha256_crypt.verify(content['password'], user.password):
             login_user(user, remember=True)
-            return 'LOGIN SUCCESS'
+            return jsonify(user.serialize), 200
+        else:
+            return '', 400
 
 @app.route("/logout")
 @login_required
 def logout():
     logout_user()
-    return 'SUCCESSFUL LOGOUT'
+    return redirect(url_for(serve))
 
 @app.route('/current')
 def current():
     if current_user.is_authenticated:
         return jsonify(current_user.serialize)
-    return 'NO ONE LOGGED IN'
+    return jsonify({"user": "False"}), 200
 
 if __name__ == '__main__':
     app.run()
