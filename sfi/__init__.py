@@ -1,4 +1,4 @@
-from os import getcwd, getenv
+from os import getcwd
 import os.path
 
 from dotenv import load_dotenv
@@ -24,11 +24,8 @@ def app_factory():
 
     app = Flask(__name__, static_folder="research-react/build", root_path=cwd)
 
-    # Configure app
-    app.config.from_object(getenv('APP_SETTINGS', 'config.Config'))
-    app.config.from_mapping(
-        SQLALCHEMY_TRACK_MODIFICATIONS=False
-    )
+    # Configure app from config.py
+    app.config.from_object('config.DevelopmentConfig')
 
     # Import and initialise SQLAlchemy
     from . import models

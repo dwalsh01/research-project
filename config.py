@@ -1,11 +1,15 @@
-from os import getenv
+from os import getenv, urandom
 
 class Config(object):
     DEBUG = False
     TESTING = False
     CSRF_ENABLED = True
-    SECRET_KEY = 'this-really-needs-to-be-changed'
-    SQLALCHEMY_DATABASE_URI = getenv('DATABASE_URL', '')
+    SECRET_KEY = urandom(16)
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_DATABASE_URI = getenv(
+        'DATABASE_URL',
+        'postgresql://localhost/research_dev'
+    )
 
 
 class ProductionConfig(Config):
@@ -20,6 +24,7 @@ class StagingConfig(Config):
 class DevelopmentConfig(Config):
     DEVELOPMENT = True
     DEBUG = True
+    SECRET_KEY="a-big-secret"
 
 
 class TestingConfig(Config):
