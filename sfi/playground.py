@@ -1,4 +1,4 @@
-from flask import Blueprint, current_app, jsonify, send_from_directory, request
+from flask import Blueprint, current_app, jsonify, send_from_directory, request, redirect, url_for
 from . import models
 
 bp = Blueprint('playground', __name__, url_prefix="/playground")
@@ -31,11 +31,11 @@ def record(state):
 @bp.route('/insert_user')
 def insert_user():
     db = current_app.config[db_config]
-    me = models.Users("moyra", "walsh","staff", "mrs. ", "phd", "12313123", 445, "moyra@gmail.com", "asdaf1")
-    db.session.add(me)
-    db.session.commit()
-    res = models.Users.query.filter_by(f_name='daragh').first()
-    return str(res.f_name)
+    me = models.Users("matthew", "walsh", "student", "mr", "ltd",
+                      "pbkdf2sha256", "252", "mw11@test.com", "password", "131223")
+
+    me.saveToDB()
+    return redirect(url_for("serve"))
 
 
 

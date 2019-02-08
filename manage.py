@@ -2,8 +2,10 @@ import os
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 
-from app import app, db
+from sfi import app_factory
 
+app = app_factory()
+db = app.config['DATABASE_OBJ']
 
 app.config.from_object(os.environ['APP_SETTINGS'])
 
