@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from flask import Flask, send_from_directory, jsonify, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import login_required, LoginManager, login_required, login_user, logout_user, current_user
+from flask_migrate import Migrate
 
 from passlib.hash import sha256_crypt
 
@@ -16,25 +17,21 @@ def app_factory():
     the parent directory of this file).
     '''
 
-    # Load environment variables
     cwd = getcwd()
-    env_path = os.path.join(cwd, ".env")
-    load_dotenv(env_path, verbose=True)
-
-
     app = Flask(__name__, static_folder="research-react/build", root_path=cwd)
 
     # Configure app from config.py
     app.config.from_object('config.DevelopmentConfig')
 
     # Import and initialise SQLAlchemy
-    from . import models
+    from sfi.models import db, Users
 
-    models.db.init_app(app)
+    db.init_app(app)
+    migrate = Migrate(app, db)
 
     # Add db to app configuration
     # (Exposes it to blueprints)
-    app.config['DATABASE_OBJ'] = models.db
+    app.config['DATABASE_OBJ'] = db
 
     # Register playground routes
     from . import playground
@@ -47,14 +44,13 @@ def app_factory():
 
     @login_manager.user_loader
     def user_loader(user_id):
-        return models.Users.query.get(user_id)
+        return Users.query.get(user_id)
 
 
     @app.route('/login_user' , methods=['POST'])
     def login():
         content = request.get_json()
-        print(f'hi im content {content}')
-        user = models.Users.query.filter_by(email=content['email']).first()
+        user = Users.query.filter_by(email=content['email']).first()
         if user:
             if sha256_crypt.verify(content['password'], user.password):
                 login_user(user, remember=True)
