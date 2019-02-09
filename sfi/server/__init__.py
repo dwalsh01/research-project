@@ -9,7 +9,7 @@ from flask_migrate import Migrate
 from sfi.utils import get_project_root
 
 
-def app_factory():
+def app_factory(config_param='sfi.server.config.DevelopmentConfig'):
     ''' Initialises the app.
 
     Initialises the app using the app
@@ -24,7 +24,7 @@ def app_factory():
 
     app_settings = os.getenv(
         'APP_SETTINGS',
-        'sfi.server.config.DevelopmentConfig'
+        config_param
     )
     # Configure app from config.py
     app.config.from_object(app_settings)
