@@ -1,2 +1,2 @@
 FLASK_ENV=development
-FLASK_APP='sfi:app_factory()'
+FLASK_APP='manage.py'
