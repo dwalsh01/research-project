@@ -1,14 +1,13 @@
 import os.path
 from os import getenv
-from sfi.utils import get_project_root
 from pathlib import PurePath
 
-from flask import Flask, send_from_directory, jsonify, request, redirect, url_for
+from flask import Flask, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import login_required, LoginManager, login_required, login_user, logout_user, current_user
 from flask_migrate import Migrate
 
-from passlib.hash import sha256_crypt
+from sfi.utils import get_project_root
+
 
 def app_factory():
     ''' Initialises the app.
@@ -47,44 +46,10 @@ def app_factory():
     from . import playground
     app.register_blueprint(playground.bp)
 
+    from . import auth
 
-    login_manager = LoginManager()
-    login_manager.init_app(app)
-
-
-    @login_manager.user_loader
-    def user_loader(user_id):
-        return Users.query.get(user_id)
-
-
-    @app.route('/login_user' , methods=['POST'])
-    def login():
-        content = request.get_json()
-        user = Users.query.filter_by(email=content['email']).first()
-        if user:
-            if sha256_crypt.verify(content['password'], user.password):
-                login_user(user, remember=True)
-                return jsonify(user.serialize), 200
-            else:
-                return '', 400
-
-
-
-    @app.route("/logout")
-    @login_required
-    def logout():
-        logout_user()
-        return redirect(url_for("serve"))
-
-    @app.route('/current')
-    def current():
-        if current_user.is_authenticated:
-            return jsonify(current_user.serialize)
-        return jsonify({"user": "False"}), 200
-
-
-
-
+    auth.login_manager.init_app(app)
+    app.register_blueprint(auth.bp)
 
 
     # Serve React App
@@ -95,7 +60,6 @@ def app_factory():
             return send_from_directory(build, path)
         else:
             return send_from_directory(build, 'index.html')
-
 
 
     return app
