@@ -1,4 +1,4 @@
-from sfi import app_factory
+from sfi.server import app_factory
 
 app = app_factory()
 
