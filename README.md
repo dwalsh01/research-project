@@ -10,15 +10,16 @@
 
 ## Running the app
 
-1. Source the .env file
-
+1.  Activate your venv
     ```bash
-        source .env
+        source venv/bin/activate
+    ```
+    Or, on Windows
+    ```bash
+        venv\Scripts\activate.bat
     ```
 
-2.  Activate your venv
-
-3. Run flask
+2. Run flask
     ```bash
         flask run
     ```
@@ -109,12 +110,7 @@
        cd research-react && npm install
    ```
 
-7. Now you should be able to run the project using either:
-   - python directly
-   ```bash
-       python3 app.py
-   ```
-   - flask, by declaring FLASK_APP=app.py and then running:
+7. To run the project:
    ```bash
        flask run
    ```
