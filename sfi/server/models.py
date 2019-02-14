@@ -26,7 +26,8 @@ class Users(UserMixin, db.Model):
     authenticated = db.Column(db.Boolean, default=False)
 
 
-    def __init__ (self, f_name, l_name, job_title, prefix, suffix, phone, phone_ext, email, password, orcid):
+    def __init__ (self, f_name, l_name, job_title, prefix, suffix, phone, phone_ext, email, password, orcid, **kwargs):
+        super(Users, self).__init__(**kwargs)
         self.f_name = f_name
         self.l_name = l_name
         self.job_title = job_title

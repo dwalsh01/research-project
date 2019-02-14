@@ -5,9 +5,10 @@ bp = Blueprint('playground', __name__, url_prefix="/playground")
 
 
 sampleData = [
-    {"grant_id": 0, "grant_title": 'Sample title 1'},
-    {"grant_id": 1, "grant_title": 'Sample title 2'},
-    {"grant_id": 2, "grant_title": 'Sample title 3'}
+    {"grant_id": 0, "grant_title": 'Brussels Conference Programme'},
+    {"grant_id": 1, "grant_title": 'SFI Frontiers for Future Programme'},
+    {"grant_id": 2, "grant_title": 'SFI Discover Programme'},
+    {"grand_id": 3, "grant_title": 'US-Ireland R&D Programme'}
  ]
 
 db_config = "DATABASE_OBJ"

@@ -41,3 +41,37 @@ def current():
     if current_user.is_authenticated:
         return jsonify(current_user.serialize)
     return jsonify({"user": "False"}), 200
+
+@bp.route('/register', methods=['POST'])
+def register():
+    post_request = request.get_json()
+
+    existing = Users.query.filter_by(email=post_request.get('email')).first()
+    if not existing:
+        new_user = Users(
+            post_request.get('first_name'),
+            post_request.get('second_name'),
+            post_request.get('job_title'),
+            post_request.get('prefix'),
+            post_request.get('suffix'),
+            post_request.get('phone'),
+            post_request.get('phone_extension'),
+            post_request.get('email'),
+            post_request.get('password'),
+            post_request.get('orcid')
+        )
+
+        new_user.saveToDB()
+
+        json_response = {
+            'status': 'success',
+            'message': 'Successfully registered'
+        }
+        return jsonify(json_response), 201
+    else:
+        fail_response = {
+            'status': 'failure',
+            'message': f'User with that email already exists.'
+        }
+        return jsonify(fail_response), 202
+        return jsonify({'dontcomplain': 'thanks'}), 200
