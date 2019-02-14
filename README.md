@@ -66,7 +66,6 @@
 
     ```bash
        git clone https://github.com/dwalsh01/research-project.git
-       cd research-project/
     ```
 
     #### Github Desktop
@@ -107,7 +106,9 @@
    - install dependencies with npm:
 
    ```bash
-       cd research-react && npm install
+       cd research-react
+       npm install
+       npm run-script build
    ```
 
 7. To run the project:
