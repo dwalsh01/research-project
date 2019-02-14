@@ -1,14 +1,19 @@
+import os.path
 from flask import Blueprint, request, jsonify, redirect, url_for
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
+from flasgger import swag_from
 from passlib.hash import sha256_crypt
 
 from .models import Users
+from sfi.utils import get_project_root
 
-
+swagger_dir = os.path.join(get_project_root(), "swagger")
 
 bp = Blueprint('auth', __name__)
 
 login_manager = LoginManager()
+
+
 
 @login_manager.user_loader
 def user_loader(user_id):
@@ -42,7 +47,9 @@ def current():
         return jsonify(current_user.serialize)
     return jsonify({"user": "False"}), 200
 
+
 @bp.route('/register', methods=['POST'])
+@swag_from(f'{swagger_dir}/register.yml', methods=['POST'])
 def register():
     post_request = request.get_json()
 
@@ -75,3 +82,5 @@ def register():
         }
         return jsonify(fail_response), 202
         return jsonify({'dontcomplain': 'thanks'}), 200
+
+

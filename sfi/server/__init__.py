@@ -5,6 +5,7 @@ from pathlib import PurePath
 from flask import Flask, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flasgger import Swagger
 
 from sfi.utils import get_project_root
 
@@ -39,6 +40,8 @@ def app_factory(config_param='sfi.server.config.DevelopmentConfig'):
     # (Exposes it to blueprints)
     app.config['DATABASE_OBJ'] = db
 
+    # Setup Swagger
+    swag = Swagger(app)
 
     #Blueprints
 
