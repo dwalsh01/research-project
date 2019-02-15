@@ -50,9 +50,13 @@ def app_factory(config_param='sfi.server.config.DevelopmentConfig'):
     app.register_blueprint(playground.bp)
 
     from . import auth
-
     auth.login_manager.init_app(app)
     app.register_blueprint(auth.bp)
+
+    from . import admin
+    app.register_blueprint(admin.bp)
+
+    
 
 
     # Serve React App
