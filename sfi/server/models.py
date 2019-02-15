@@ -36,26 +36,25 @@ class Users(UserMixin, db.Model, DBFunctions):
 
     @staticmethod
     def convertToSchema(request_data):
+        mapping = {
+            'first_name': 'f_name',
+            'second_name': 'l_name',
+            'job_title': 'job_title',
+            'prefix': 'prefix',
+            'suffix': 'suffix',
+            'phone': 'phone',
+            'phone_extension': 'phone_ext',
+            'email': 'email',
+            'password': 'password',
+            'orcid': 'orcid'
+        }
 
-    mapping = {
-        'first_name': 'f_name',
-        'second_name': 'l_name',
-        'job_title': 'job_title',
-        'prefix': 'prefix',
-        'suffix': 'suffix',
-        'phone': 'phone',
-        'phone_extension': 'phone_ext',
-        'email': 'email',
-        'password': 'password',
-        'orcid': 'orcid'
-    }
+        out = dict()
+        for key in request_data:
+            out[mapping[key]] = request_data[key]
+        out['password'] = sha256_crypt.encrypt(str(mapping['password']))
 
-    out = dict()
-    for key in request_data:
-        out[mapping[key]] = request_data[key]
-    out['password'] = sha256_crypt.encrypt(str(mapping['password']))
-
-    return out
+        return out
 
 
     def __init__ (self, **kwargs):
