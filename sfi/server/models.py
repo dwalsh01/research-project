@@ -52,7 +52,7 @@ class Users(UserMixin, db.Model, DBFunctions):
         out = dict()
         for key in request_data:
             out[mapping[key]] = request_data[key]
-        out['password'] = sha256_crypt.encrypt(str(mapping['password']))
+        out['password'] = sha256_crypt.encrypt(str(out['password']))
 
         return out
 
@@ -177,11 +177,15 @@ class ProposalCall(db.Model, DBFunctions):
     eligibil_text = db.Column(db.Text(), nullable=False)
     duration = db.Column(db.Interval(native=True))
     report_guidelines = db.Column(db.Text(), nullable=False)
-    report_guide_pdf = db.Column(db.LargeBinary())
-    report_guide_filename = db.Column(db.String(75))
+    files = db.relationship('ProposalCallFiles', backref='call', lazy=True)
     start_date = db.Column(db.Date())
     start_date_end = db.Column(db.Date())
     contact = db.Column(db.String(75), nullable=False)
+
+
+class ProposalCallFiles(FileStore, db.Model):
+    id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
+    prop_id = db.Column(db.Integer, db.ForeignKey('proposal_call.id'), nullable=False)
 
 '''
 Users:
@@ -229,10 +233,10 @@ Should be able to have a draft (completed bool?)/seperate table
 '''
 class ProposalApplication(db.Model, DBFunctions):
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
-    proposal_id = db.Column(db.Integer, db.ForeignKey('proposal.id'), nullable=False)
+    proposal_id = db.Column(db.Integer, db.ForeignKey('proposal_call.id'), nullable=False)
     title = db.Column(db.Text, nullable=False)
     duration = db.Column(db.Interval(native=True))
-    nrp_area = db.Column(db.Integer, db.ForeignKey('nrparea.nrp_id'), nullable=False)
+    nrp_area = db.Column(db.Integer, db.ForeignKey('nrp_area.nrp_id'), nullable=False)
     textbox = db.Column(db.Text, nullable=False)
     animal_statement = db.Column(db.Text, nullable=False)
     human_statement = db.Column(db.Text, nullable=False)
@@ -250,7 +254,7 @@ class ApplicationFiles(FileStore, db.Model):
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
     prop_id = db.Column(db.Integer, db.ForeignKey('proposal_application.id'), nullable=False)
 
-class NRPArea(db.Model, DBFunctions):
+class NrpArea(db.Model, DBFunctions):
     nrp_id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
     nrp_title = db.Column(db.String(200), nullable=False)
 
