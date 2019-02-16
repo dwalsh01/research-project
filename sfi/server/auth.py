@@ -2,7 +2,7 @@ import os.path
 from flask import Blueprint, request, jsonify, redirect, url_for
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 from flasgger import swag_from, validate
-from passlib.hash import sha256_crypt
+from passlib.hash import pbkdf2_sha256
 
 from .models import Users
 from sfi.utils import get_project_root
@@ -23,7 +23,7 @@ def login():
     content = request.get_json()
     user = Users.query.filter_by(email=content['email']).first()
     if user:
-        if sha256_crypt.verify(content['password'], user.password):
+        if pbkdf2_sha256.verify(content['password'], user.password):
             login_user(user, remember=True)
             return jsonify(user.serialize), 200
         else:

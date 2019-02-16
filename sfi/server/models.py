@@ -1,5 +1,5 @@
 from flask_sqlalchemy import Model, SQLAlchemy
-from passlib.hash import sha256_crypt
+from passlib.hash import pbkdf2_sha256
 from flask_login import UserMixin
 
 db = SQLAlchemy()
@@ -48,18 +48,15 @@ class Users(UserMixin, db.Model, DBFunctions):
             'password': 'password',
             'orcid': 'orcid'
         }
-
         out = dict()
         for key in request_data:
             out[mapping[key]] = request_data[key]
-        out['password'] = sha256_crypt.encrypt(str(out['password']))
-
         return out
 
 
     def __init__ (self, **kwargs):
         super(Users, self).__init__(**kwargs)
-        self.password = sha256_crypt.encrypt(str(self.password))
+        self.password = pbkdf2_sha256.hash(str(self.password))
 
 
     def is_active(self):
