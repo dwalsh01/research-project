@@ -56,7 +56,8 @@ def app_factory(config_param='sfi.server.config.DevelopmentConfig'):
     from . import admin
     app.register_blueprint(admin.bp)
 
-    
+    from . import proposal
+    app.register_blueprint(proposal.bp)
 
 
     # Serve React App

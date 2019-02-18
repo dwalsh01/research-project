@@ -5,11 +5,11 @@ description: "Registers a new researcher. Must provide unique emails."
 parameters:
   - name: "researcher"
     in: "body"
+    type: string
+    required: true
     description: "Researcher to register"
     schema:
       $ref: '#/definitions/Researcher'
-    type: string
-    required: true
 definitions:
   Researcher:
     type: object
@@ -39,4 +39,5 @@ definitions:
 responses:
   200:
     description: A success/error message
+
 
