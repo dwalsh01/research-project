@@ -1,12 +1,11 @@
 import pytest
-
 from sfi.server import app_factory
 
 
 @pytest.fixture
 def app():
     app = app_factory(config_param='sfi.server.config.TestingConfig')
-    
+
     yield app
 
 @pytest.fixture

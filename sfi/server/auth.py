@@ -5,8 +5,9 @@ from flask import send_from_directory, current_app, render_template, abort, \
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 from flasgger import swag_from, validate
 from passlib.hash import pbkdf2_sha256
+from sqlalchemy.exc import IntegrityError
 
-from .models import Users
+from .models import Users, UsersSchema
 from sfi.utils import get_project_root
 
 import os
@@ -67,7 +68,8 @@ def login():
     if user:
         if pbkdf2_sha256.verify(content['password'], user.password):
             login_user(user, remember=True)
-            return jsonify(user.serialize), 200
+            user_schema = UserSchema()
+            return user_schema.jsonify(user), 200
         else:
             return '', 400
 
@@ -84,8 +86,9 @@ def logout():
 @bp.route('/api/user')
 def current():
     if current_user.is_authenticated:
-        return jsonify({"user": current_user.serialize})
-    return jsonify({"user": 0}), 200
+        user_schema = UsersSchema()
+        return user_schema.jsonify(current_user)
+    return jsonify({"user": "False"}), 200
 
 
 @bp.route('/register', methods=['POST'])
@@ -98,18 +101,38 @@ def register():
 
     if not existing:
         mapping = Users.convertToSchema(post_request)
-        new_user = Users(**mapping)
-        new_user.saveToDB()
+        try:
+            new_user = Users(**mapping)
+            new_user.saveToDB()
 
-        json_response = {
-            'status': 'success',
-            'message': 'Successfully registered'
-        }
-        return jsonify(json_response), 201
+            json_response = {
+                'status': 'success',
+                'message': 'Successfully registered'
+            }
+            return jsonify(json_response), 201
 
+        except IntegrityError as e:
+            short_error = e.orig.diag.message_primary
+            invalid_format = {
+                'status': 'failure',
+                'message': 'invalid_format',
+                'error': short_error
+            }
+            return jsonify(invalid_format), 400
     else:
         fail_response = {
             'status': 'failure',
-            'message': f'User with that email already exists.'
+            'message': 'User with that email already exists'
         }
-        return jsonify(fail_response), 202
+        return jsonify(fail_response), 400
+
+
+
+@bp.route('/profile/education', methods=['POST'])
+def add_education():
+    post_request = request.get_json()
+
+@bp.route('/profile/education', methods=['GET'])
+def get_education():
+    pass
+

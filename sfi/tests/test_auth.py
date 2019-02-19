@@ -1,22 +1,23 @@
 from sfi.server.models import Users
+import json
 
 def test_register(client, app):
-    test_email = 'hola@ytree.com'
+    test_email = "hola@ytree.com"
 
     response = client.post(
         '/register',
-        data={
-            'first_name': 'Mattias',
-            'second_name': 'Wilson',
-            'job_title': 'Researcher',
-            'prefix':  'Mr',
-            'suffix': 'III',
-            'phone': '082-4593822',
-            'phone_extension': '353',
-            'email': test_email,
-            'password': 'hashed',
-            'orcid': '0000-0002-0141-7356'
-        },
+        data=json.dumps({
+            "first_name": "Mattias",
+            "second_name": "Wilson",
+            "job_title": "Researcher",
+            "prefix":  "Mr",
+            "suffix": "III",
+            "phone": "082-4593822",
+            "phone_extension": 353,
+            "email": test_email,
+            "password": "hashed",
+            "orcid": "0000-0002-0141-7356"
+        }),
         content_type='application/json'
     )
 

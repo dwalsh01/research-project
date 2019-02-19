@@ -1,8 +1,10 @@
 from flask_sqlalchemy import Model, SQLAlchemy
 from passlib.hash import pbkdf2_sha256
 from flask_login import UserMixin
+from flask_marshmallow import Marshmallow
 
 db = SQLAlchemy()
+ma = Marshmallow()
 
 def dump_datetime(value):
     """Deserialize datetime object into string form for JSON processing."""
@@ -22,6 +24,7 @@ class FileStore:
 
 class Users(UserMixin, db.Model, DBFunctions):
     id = db.Column(db.Integer, primary_key=True)
+    #user_type = db.Column(db.Integer, db.ForeignKey('user_types.user_id'), nullable=False)
     f_name = db.Column(db.String(25), nullable=False)
     l_name = db.Column(db.String(30), nullable=False)
     job_title = db.Column(db.String(50), nullable=False)
@@ -75,32 +78,31 @@ class Users(UserMixin, db.Model, DBFunctions):
         """False, as anonymous users aren't supported."""
         return False
 
-    @property
-    def serialize(self):
-       """Return object data in easily serializeable format"""
-       return {
-           "id": self.id,
-           "f_name": self.f_name,
-           "l_name": self.l_name,
-           "job_title": self.job_title,
-           "prefix": self.prefix,
-           "suffix": self.suffix,
-           "phone": self.phone,
-           "phone_ext": self.phone_ext,
-           "email": self.email,
-           "orcid": self.orcid,
-       }
-
+class UsersSchema(ma.ModelSchema):
+    class Meta:
+        fields = ('id',
+                  'f_name',
+                  'l_name',
+                  'job_title',
+                  'prefix',
+                  'suffix',
+                  'phone',
+                  'phone_ext',
+                  'email',
+                  'orcid'
+                )
 
 class Education(db.Model, DBFunctions):
-    id = db.Column(db.Integer, primary_key=True)
-    person_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    person_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, primary_key=True)
     degree = db.Column(db.String(25), nullable=False)
     field_of_study = db.Column(db.String(30), nullable=False)
     institution = db.Column(db.String(25))
     location = db.Column(db.String(50))
     year_degree_award = db.Column(db.DateTime)
 
+class EducationSchema(ma.ModelSchema):
+    class Meta:
+        model = Education
 
 class Employment(db.Model, DBFunctions):
     id = db.Column(db.Integer, primary_key=True)
@@ -182,10 +184,23 @@ class ProposalCall(db.Model, DBFunctions):
     start_date_end = db.Column(db.Date())
     contact = db.Column(db.String(75), nullable=False)
 
-
 class ProposalCallFiles(FileStore, db.Model):
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
     prop_id = db.Column(db.Integer, db.ForeignKey('proposal_call.id'), nullable=False)
+
+class ShortProposalSchema(ma.ModelSchema):
+    class Meta:
+        fields = ('id',
+                  'deadline_text',
+                  'deadline_time',
+                  'award_amount',
+                  'title',
+                  'short_text'
+                 )
+
+class LongProposalSchema(ma.ModelSchema):
+    class Meta:
+        model = ProposalCall
 
 '''
 Users:

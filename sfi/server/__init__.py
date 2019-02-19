@@ -31,9 +31,10 @@ def app_factory(config_param='sfi.server.config.DevelopmentConfig'):
     app.config.from_object(app_settings)
 
     # Import and initialise SQLAlchemy
-    from sfi.server.models import db, Users
+    from sfi.server.models import db, ma
 
     db.init_app(app)
+    ma.init_app(app)
     migrate = Migrate(app, db)
 
     # Add db to app configuration
