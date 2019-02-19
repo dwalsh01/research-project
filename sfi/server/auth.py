@@ -17,10 +17,11 @@ login_manager = LoginManager()
 def user_loader(user_id):
     return Users.query.get(user_id)
 
-
 @bp.route('/login_user' , methods=['POST'])
 def login():
     content = request.get_json()
+    if current_user.is_authenticated:
+        return redirect(url_for("serve"))
     user = Users.query.filter_by(email=content['email']).first()
     if user:
         if pbkdf2_sha256.verify(content['password'], user.password):
@@ -31,7 +32,7 @@ def login():
 
 
 
-@bp.route("/logout")
+@bp.route("/api/logout")
 @login_required
 def logout():
     logout_user()
@@ -39,11 +40,11 @@ def logout():
 
 
 
-@bp.route('/current')
+@bp.route('/api/user')
 def current():
     if current_user.is_authenticated:
-        return jsonify(current_user.serialize)
-    return jsonify({"user": "False"}), 200
+        return jsonify({"user": current_user.serialize})
+    return jsonify({"user": 0}), 200
 
 
 @bp.route('/register', methods=['POST'])
