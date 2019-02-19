@@ -87,7 +87,8 @@ def logout():
 def current():
     if current_user.is_authenticated:
         user_schema = UsersSchema()
-        return user_schema.jsonify(current_user)
+        user = user_schema.dumps(current_user)
+        return jsonify({"user": user}), 200
     return jsonify({"user": "False"}), 200
 
 
