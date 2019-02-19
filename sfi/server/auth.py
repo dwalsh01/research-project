@@ -1,5 +1,7 @@
 import os.path
-from flask import Blueprint, request, jsonify, redirect, url_for
+from flask import send_from_directory, current_app, render_template, abort, \
+     Blueprint, request, jsonify, redirect, url_for, Flask, flash, request, \
+     redirect, url_for
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 from flasgger import swag_from, validate
 from passlib.hash import pbkdf2_sha256
@@ -7,10 +9,49 @@ from passlib.hash import pbkdf2_sha256
 from .models import Users
 from sfi.utils import get_project_root
 
+import os
+from werkzeug.utils import secure_filename
+
+
 
 swagger_auth = os.path.join(get_project_root(), "swagger", "api-auth.yml")
 bp = Blueprint('auth', __name__)
 login_manager = LoginManager()
+
+
+ALLOWED_EXTENSIONS = set(['pdf'])
+
+def allowed_file(filename):
+    return '.' in filename and \
+        filename.rsplit('.')[-1].lower() in ALLOWED_EXTENSIONS
+
+@bp.route('/upload_file', methods=['GET', 'POST'])
+def upload_file():
+    if request.method == 'POST':
+        # check if the post request has the file part
+        if 'file' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
+        file = request.files['file']
+        # if user does not select file, browser also
+        # submit an empty part without filename
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(request.url)
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
+            return redirect(url_for('auth.upload_file', filename=filename))
+
+    return '''
+    <!doctype html>
+    <title>Upload new File</title>
+    <h1>Upload new File</h1>
+    <form method=post enctype=multipart/form-data>
+      <input type=file name=file>
+      <input type=submit value=Upload>
+    </form>
+    '''
 
 
 @login_manager.user_loader

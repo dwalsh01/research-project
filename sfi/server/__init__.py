@@ -43,6 +43,9 @@ def app_factory(config_param='sfi.server.config.DevelopmentConfig'):
     # Setup Swagger
     swag = Swagger(app)
 
+    UPLOAD_FOLDER = 'UPLOAD_FOLDER'
+    app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
     #Blueprints
 
     # Register playground routes
