@@ -68,7 +68,7 @@ def login():
     if user:
         if pbkdf2_sha256.verify(content['password'], user.password):
             login_user(user, remember=True)
-            user_schema = UserSchema()
+            user_schema = UsersSchema()
             return user_schema.jsonify(user), 200
         else:
             return '', 400
@@ -87,9 +87,9 @@ def logout():
 def current():
     if current_user.is_authenticated:
         user_schema = UsersSchema()
-        user = user_schema.dumps(current_user)
-        return jsonify({"user": user}), 200
-    return jsonify({"user": "False"}), 200
+        user = user_schema.dump(current_user)
+        return jsonify({"user": user.data  }), 200
+    return jsonify({"user": 0}), 200
 
 
 @bp.route('/register', methods=['POST'])
