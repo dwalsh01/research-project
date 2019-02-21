@@ -71,7 +71,9 @@ def login():
             user_schema = UsersSchema()
             return user_schema.jsonify(user), 200
         else:
-            return '', 400
+            return jsonify({"error": "invalid password" }), 400
+    else:
+        return jsonify({"error": "email does not exist"}), 400
 
 
 
