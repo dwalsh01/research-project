@@ -79,7 +79,10 @@ def login():
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for("serve"))
+    # keep this here for testing, comment it out and use bottom
+    # return statement with production build
+    return jsonify({"logout": "success"}), 200
+    # return redirect(url_for("serve"))
 
 
 
