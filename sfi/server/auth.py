@@ -19,6 +19,30 @@ swagger_auth = os.path.join(get_project_root(), "swagger", "api-auth.yml")
 bp = Blueprint('auth', __name__)
 login_manager = LoginManager()
 
+# THIS WILL NEED TO BE MOVED I THINK THIS WILL
+# HANDLE THE VARIOUS ERROR RESPONSE TO FRONT END (HOPEFULLY)
+class InvalidUsage(Exception):
+    status_code = 400
+
+    def __init__(self, message, status_code=None, payload=None):
+        Exception.__init__(self)
+        self.message = message
+        if status_code is not None:
+            self.status_code = status_code
+        self.payload = payload
+
+    def to_dict(self):
+        rv = dict(self.payload or ())
+        rv['message'] = self.message
+        return rv
+
+@bp.app_errorhandler(InvalidUsage)
+def handle_invalid_usage(error):
+    response = jsonify(error.to_dict())
+    response.status_code = error.status_code
+    return response
+
+# END OF WHAT NEEDS TO BE MOVED
 
 ALLOWED_EXTENSIONS = set(['pdf'])
 
@@ -71,9 +95,9 @@ def login():
             user_schema = UsersSchema()
             return user_schema.jsonify(user), 200
         else:
-            return jsonify({"error": "invalid password" }), 400
+            raise InvalidUsage(message='Password incorrect, please try again', status_code=400)
     else:
-        return jsonify({"error": "email does not exist"}), 400
+        raise InvalidUsage(message='Email incorrect, please try again.', status_code=400)
 
 
 
