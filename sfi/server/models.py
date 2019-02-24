@@ -92,6 +92,16 @@ class UsersSchema(ma.ModelSchema):
                   'orcid'
                 )
 
+class EducationSchema(ma.ModelSchema):
+    class Meta:
+        fields = ('person_id',
+                  'degree',
+                  'field_of_study',
+                  'institution',
+                  'location',
+                  'year_degree_award',
+
+                )
 class Education(db.Model, DBFunctions):
     person_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, primary_key=True)
     degree = db.Column(db.String(25), nullable=False)
@@ -99,6 +109,14 @@ class Education(db.Model, DBFunctions):
     institution = db.Column(db.String(25))
     location = db.Column(db.String(50))
     year_degree_award = db.Column(db.DateTime)
+
+    def __init__(self, person_id, degree, field_of_study, institution, location, year_degree_award):
+       self.person_id = person_id
+       self.degree = degree
+       self.field_of_study = field_of_study
+       self.institution = institution
+       self.location = location
+       self.year_degree_award = year_degree_award
 
 class EducationSchema(ma.ModelSchema):
     class Meta:
@@ -110,6 +128,9 @@ class Employment(db.Model, DBFunctions):
     institution = db.Column(db.String(50))
     location = db.Column(db.String(100))
     years = db.Column(db.Float)
+
+    def __init__(self, *args, **kwargs):
+        return super(Employment).__init__(*args, **kwargs)
 
 
 class Societies(db.Model, DBFunctions):
@@ -148,7 +169,6 @@ class Teams(db.Model, DBFunctions):
     name = db.Column(db.String(50))
     position = db.Column(db.String(50))
     primary_attribution = db.Column(db.Integer, db.ForeignKey('funding.id'), nullable=False)
-
 
 '''
 Proposal:

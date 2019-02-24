@@ -7,7 +7,7 @@ from flasgger import swag_from, validate
 from passlib.hash import pbkdf2_sha256
 from sqlalchemy.exc import IntegrityError
 
-from .models import Users, UsersSchema
+from .models import Users, UsersSchema, Education, EducationSchema
 from sfi.utils import get_project_root
 
 import os
@@ -19,6 +19,44 @@ swagger_auth = os.path.join(get_project_root(), "swagger", "api-auth.yml")
 bp = Blueprint('auth', __name__)
 login_manager = LoginManager()
 
+sampleTeams = [
+    {
+        "id": 1,
+        "person_id": 6,
+        "start_date": "01/01/2019",
+        "end_date": "01/02/2019",
+        "name": "The A Team",
+        "position": "Administrator",
+        "primary_attribution": 1
+    },
+    {
+        "id": 1,
+        "person_id": 6,
+        "start_date": "01/01/2019",
+        "end_date": "01/03/2019",
+        "name": "The B Team",
+        "position": "Administrator",
+        "primary_attribution": 2
+    },
+    {
+        "id": 1,
+        "person_id": 6,
+        "start_date": "03/01/2019",
+        "end_date": "05/02/2019",
+        "name": "The C Team",
+        "position": "Researcher",
+        "primary_attribution": 3
+    },
+    {
+        "id": 1,
+        "person_id": 6,
+        "start_date": "02/03/2019",
+        "end_date": "05/05/2019",
+        "name": "The D Team",
+        "position": "Researcher",
+        "primary_attribution": 5
+    }
+]
 # THIS WILL NEED TO BE MOVED I THINK THIS WILL
 # HANDLE THE VARIOUS ERROR RESPONSE TO FRONT END (HOPEFULLY)
 class InvalidUsage(Exception):
@@ -156,13 +194,47 @@ def register():
         }
         return jsonify(fail_response), 400
 
+@bp.route('/api/get_teams', methods=['GET'])
+@login_required
+def get_teams():
+    return jsonify({"teams": sampleTeams }), 200
 
+@bp.route('/api/insert_education', methods=['GET'])
+@login_required
+def insert_education():
+    user = current_user
+    educ = Education(user.id, "Bachelors of Science", "Computer Science", "University College Cork", "Cork, Ireland", "01/01/2020")
+    try:
+        educ.saveToDB()
+        json_response = {
+                'status': 'success',
+                'message': 'Successfully registered'
+            }
+        return jsonify(json_response), 201
+    except IntegrityError as e:
+            short_error = e.orig.diag.message_primary
+            invalid_format = {
+                'status': 'failure',
+                'message': 'invalid_format',
+                'error': short_error
+            }
+            return jsonify(invalid_format), 400
 
 @bp.route('/profile/education', methods=['POST'])
 def add_education():
     post_request = request.get_json()
 
+
 @bp.route('/profile/education', methods=['GET'])
+@login_required
 def get_education():
-    pass
+    user = current_user
+    existing = Education.query.filter_by(person_id=user.id).first()
+    if existing:
+        edu_schema = EducationSchema()
+        edu = edu_schema.dump(existing)
+        return jsonify({"education": edu.data}), 200
+    else:
+        return jsonify({"message": "No education information available"})
+
 
