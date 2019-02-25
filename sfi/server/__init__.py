@@ -48,8 +48,6 @@ def app_factory(config_param='sfi.server.config.DevelopmentConfig'):
     app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
     #Blueprints
-
-    # Register playground routes
     from . import playground
     app.register_blueprint(playground.bp)
 
@@ -72,6 +70,5 @@ def app_factory(config_param='sfi.server.config.DevelopmentConfig'):
             return send_from_directory(build, path)
         else:
             return send_from_directory(build, 'index.html')
-
 
     return app
