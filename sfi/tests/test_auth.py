@@ -1,11 +1,11 @@
 from sfi.server.models import Users
 import json
 
-def test_register(client, app):
+def test_regis_researcher(client, app):
     test_email = "hola@ytree.com"
 
     response = client.post(
-        '/register',
+        '/api/register',
         data=json.dumps({
             "first_name": "Mattias",
             "second_name": "Wilson",
@@ -25,3 +25,10 @@ def test_register(client, app):
     with app.app_context():
         query = Users.query.filter_by(email=test_email).first()
         print(f'q: {query}')
+
+def test_regis_admin(client, app):
+    pass
+
+
+def test_regis_review(client, app):
+    pass

@@ -4,7 +4,7 @@ import json
 def test_add_proposal(client, app):
 
     response = client.post(
-        '/calls/add',
+        'api/calls/add',
         data=json.dumps({
             "deadline_text": "Rolling",
             "deadline_time": "1 month",
@@ -25,3 +25,14 @@ def test_add_proposal(client, app):
     with app.app_context():
         query = ProposalCall.query.first()
         print(f'q: {query}')
+
+def test_edit_prop(client, app):
+    pass
+
+def test_apply_draft(client, app):
+    pass
+
+def test_apply_submit(client, app):
+    pass
+
+
