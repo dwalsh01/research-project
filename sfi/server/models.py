@@ -293,6 +293,9 @@ class NrpArea(db.Model, DBFunctions):
     nrp_id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
     nrp_title = db.Column(db.String(200), nullable=False)
 
+class NrpSchema(ma.ModelSchema):
+    class Meta:
+        model = NrpArea
 
 '''
 
