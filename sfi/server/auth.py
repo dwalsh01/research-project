@@ -7,8 +7,9 @@ from flasgger import swag_from, validate
 from passlib.hash import pbkdf2_sha256
 from sqlalchemy.exc import IntegrityError
 
-from .models import Users, UsersSchema, Education, EducationSchema
+from .models import Users, UsersSchema, Education, EducationSchema, UserTypes
 from sfi.utils import get_project_root
+from .common_functions import post_request_short
 
 import os
 from werkzeug.utils import secure_filename
@@ -169,30 +170,17 @@ def register():
 
     if not existing:
         mapping = Users.convertToSchema(post_request)
-        try:
-            new_user = Users(**mapping)
-            new_user.saveToDB()
-
-            json_response = {
-                'status': 'success',
-                'message': 'Successfully registered'
-            }
-            return jsonify(json_response), 201
-
-        except IntegrityError as e:
-            short_error = e.orig.diag.message_primary
-            invalid_format = {
-                'status': 'failure',
-                'message': 'invalid_format',
-                'error': short_error
-            }
-            return jsonify(invalid_format), 400
+        user_type = UserTypes.query.filter_by(user_name="researcher").first()
+        mapping["user_type"] = user_type.user_id
+        return post_request_short(Users, mapping, "Successfully registered")
     else:
         fail_response = {
             'status': 'failure',
             'message': 'User with that email already exists'
         }
         return jsonify(fail_response), 400
+
+
 
 @bp.route('/api/get_teams', methods=['GET'])
 @login_required

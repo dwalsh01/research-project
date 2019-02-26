@@ -4,6 +4,7 @@ from flasgger import swag_from, validate
 from sfi.utils import get_project_root
 from .models import ProposalCall, LongProposalSchema, ShortProposalSchema
 from sqlalchemy.exc import IntegrityError
+from .common_functions import post_request_short
 
 swagger_prop = os.path.join(get_project_root(), "swagger", "api-proposal.yml")
 bp = Blueprint('proposal', __name__, url_prefix="/calls")
@@ -29,20 +30,11 @@ def show_proposal(call_id):
 def add_proposal():
     post_request = request.get_json()
     if post_request:
-        call = ProposalCall(**post_request)
-        try:
-            call.saveToDB()
-            response = {
-                'status': 'success',
-                'message': 'call added'
-            }
-            return jsonify(response), 201
+        post_request["amount_left"] = post_request.get('award_amount', 0)
+        return post_request_short(ProposalCall, post_request, "Proposal call added")
 
-        except IntegrityError as e:
-            short_error = e.orig.diag.message_primary
-            invalid_format = {
-                'status': 'failure',
-                'message': 'invalid format',
-                'error': short_error
-            }
-            return jsonify(invalid_format), 400
+    resp = {
+        "status": "failure",
+        "message": "No JSON data provided"
+    }
+    return jsonify(resp), 400
