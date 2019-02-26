@@ -1,10 +1,25 @@
-from sfi.server.models import Users
+from sfi.server.models import Users, UserTypes
 import json
 import random
+
+
+def test_add_user_types(client, app):
+    types = ["researcher", "admin", "reviewer"]
+    with app.app_context():
+        query = UserTypes.query.all()
+        if len(query) != len(types):
+            for type in types:
+                new_type = UserTypes(user_name=type)
+                new_type.saveToDB()
+
+        query = UserTypes.query.all()
+        assert len(query) == len(types)
+
 
 def generate_email():
     emails = ["Sed", "eiusmod", "tempor", "incididunt", "labore", "dolore", "magna", "aliqua"]
     return random.choice(emails) + str(random.randint(0,999)) + "@email.com"
+
 
 def test_register(client, app):
     f_name = ["Darragh", "Tim", "Ahmad", "Kyle", "Noelie", "Matthew", "Mark", "Luke", "John"]
@@ -33,10 +48,7 @@ def test_register(client, app):
             content_type='application/json'
         )
 
-        print(f'resp: {response}')
         with app.app_context():
-            query = Users.query.filter_by(email=test_email).all()
-            table_length = Users.query.all()
-            if len(query) > 1:
-                num_duplicates += 1
-            assert len(table_length) == (i + 1 - num_duplicates)
+            query = Users.query.filter_by(email=test_email).first()
+            assert query is not None and response.status_code == 201
+
