@@ -1,10 +1,12 @@
 from sfi.server.models import ProposalCall
 import json
 import random
-import datetime
+from datetime import date
+
+
 def test_add_proposal(client, app):
     deadline_text = ["Rolling", "1/2/2020", "2/4/2019"]
-    award_amount = ["90000", "20000", "30000", "500000", "2000000", "100000"]
+    award_amount = [90000, 20000, 30000, 500000, 2000000, 100000]
     title = ["Frontiers for the Future ", "Brussels Conference Programme ",
     "SFI Discover Programme ", "SFI Research Centres ",
     "SFI Strategic Partnerships Programme"]
@@ -21,13 +23,16 @@ def test_add_proposal(client, app):
     emails = ["Sed", "eiusmod", "tempor", "incididunt", "labore", "dolore", "magna", "aliqua"]
     start_date = ["2019-3-7", "2019-5-1", "2019-6-9"]
     start_date_end = ["2025-1-2", "2022-11-7", "2021-1-20"]
+
+    r_date = date.today()
+
     num_inserts = 5
     for i in range(num_inserts):
         response = client.post(
             '/calls/add',
             data=json.dumps({
                 "deadline_text": random.choice(deadline_text),
-                "deadline_time": str(random.randint(1,7)) + "years",
+                "deadline_time": "{}".format(r_date),
                 "award_amount": random.choice(award_amount),
                 "title": random.choice(title) + str(random.randint(1,7)),
                 "short_text": random.choice(short_text),
@@ -43,6 +48,8 @@ def test_add_proposal(client, app):
             content_type='application/json'
         )
     print(f'resp: {response}')
+    print(dir(response))
+    print(response.data)
     with app.app_context():
         query = ProposalCall.query.all()
         assert len(query) >= num_inserts

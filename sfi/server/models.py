@@ -36,7 +36,7 @@ Users section:
 '''
 class UserTypes(db.Model, DBFunctions):
     user_id = db.Column(db.Integer, unique=True, primary_key=True)
-    user_name = db.Column(db.String(50), nullable=False)
+    user_name = db.Column(db.String(50), nullable=False, unique=True)
 
 
 class Users(UserMixin, db.Model, DBFunctions):
@@ -302,7 +302,7 @@ class RCTeam(db.Model, DBFunctions):
     team_name = db.Column(db.String(100), nullable=False)
     team_desc = db.Column(db.Text)
     primary_attrib = db.Column(db.ForeignKey('award_grant.primary_attrib'), nullable=False)
-    team_members = db.relationship('Users', backref='rcteam', lazy=True)
+    team_members = db.relationship('RCTeamMembers', backref='rcteam', lazy=True)
 
 class RCTeamMembers(db.Model, DBFunctions):
     id = db.Column(db.Integer, primary_key=True)
