@@ -6,13 +6,17 @@ from flask_marshmallow import Marshmallow
 db = SQLAlchemy()
 ma = Marshmallow()
 
+
+'''
+Misc base functions/classes
+'''
 def dump_datetime(value):
     """Deserialize datetime object into string form for JSON processing."""
     if value is None:
         return None
     return [value.strftime("%Y-%m-%d"), value.strftime("%H:%M:%S")]
 
-class DBFunctions:
+class DBFunctions():
     def saveToDB(self):
         db.session.add(self)
         db.session.commit()
@@ -21,10 +25,23 @@ class FileStore:
     filename = db.Column(db.String(100), nullable=False)
     file_data = db.Column(db.LargeBinary, nullable=False)
 
+'''
+Users section:
+
+- Admin
+- Researcher
+- Reviewer
+- Host university
+- RC Centre?
+'''
+class UserTypes(db.Model, DBFunctions):
+    user_id = db.Column(db.Integer, unique=True, primary_key=True)
+    user_name = db.Column(db.String(50), nullable=False)
+
 
 class Users(UserMixin, db.Model, DBFunctions):
     id = db.Column(db.Integer, primary_key=True)
-    #user_type = db.Column(db.Integer, db.ForeignKey('user_types.user_id'), nullable=False)
+    user_type = db.Column(db.Integer, db.ForeignKey('user_types.user_id'), nullable=False)
     f_name = db.Column(db.String(25), nullable=False)
     l_name = db.Column(db.String(30), nullable=False)
     job_title = db.Column(db.String(50), nullable=False)
@@ -34,8 +51,7 @@ class Users(UserMixin, db.Model, DBFunctions):
     phone_ext = db.Column(db.Integer)
     email=db.Column(db.String(50), nullable=False, unique=True)
     password=db.Column(db.String(256))
-    orcid=db.Column(db.String(50), nullable=False)
-    authenticated = db.Column(db.Boolean, default=False)
+    orcid=db.Column(db.String(50))
 
     @staticmethod
     def convertToSchema(request_data):
@@ -70,13 +86,10 @@ class Users(UserMixin, db.Model, DBFunctions):
         """Return the email address to satisfy Flask-Login's requirements."""
         return self.id
 
-    def is_authenticated(self):
-        """Return True if the user is authenticated."""
-        return self.authenticated
-
     def is_anonymous(self):
         """False, as anonymous users aren't supported."""
         return False
+
 
 class UsersSchema(ma.ModelSchema):
     class Meta:
@@ -92,35 +105,19 @@ class UsersSchema(ma.ModelSchema):
                   'orcid'
                 )
 
-class EducationSchema(ma.ModelSchema):
-    class Meta:
-        fields = ('person_id',
-                  'degree',
-                  'field_of_study',
-                  'institution',
-                  'location',
-                  'year_degree_award',
 
-                )
 class Education(db.Model, DBFunctions):
-    person_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, primary_key=True)
     degree = db.Column(db.String(25), nullable=False)
     field_of_study = db.Column(db.String(30), nullable=False)
     institution = db.Column(db.String(25))
     location = db.Column(db.String(50))
     year_degree_award = db.Column(db.DateTime)
 
-    def __init__(self, person_id, degree, field_of_study, institution, location, year_degree_award):
-       self.person_id = person_id
-       self.degree = degree
-       self.field_of_study = field_of_study
-       self.institution = institution
-       self.location = location
-       self.year_degree_award = year_degree_award
-
 class EducationSchema(ma.ModelSchema):
     class Meta:
         model = Education
+
 
 class Employment(db.Model, DBFunctions):
     id = db.Column(db.Integer, primary_key=True)
@@ -128,10 +125,6 @@ class Employment(db.Model, DBFunctions):
     institution = db.Column(db.String(50))
     location = db.Column(db.String(100))
     years = db.Column(db.Float)
-
-    def __init__(self, *args, **kwargs):
-        return super(Employment).__init__(*args, **kwargs)
-
 
 class Societies(db.Model, DBFunctions):
     id = db.Column(db.Integer, primary_key=True)
@@ -172,40 +165,33 @@ class Teams(db.Model, DBFunctions):
 
 '''
 Proposal:
-    Deadline TEXT STRING
-    Deadline int months
-    Text - TEXT
-    Target audience (text)
-    Eligiblity criteria (text)
-    Duration of the award (24/48 months etc) int MONTHS NULLABLE
-    report guidelines TEXT
-    report guidelines FILE
-    Reporting Guidelines of the award (text/pdf)
-    Start date DATE
-    Start date end DATE
-    contact EMAIL
-
-    Closed/Rolling/Open
+    deadline_text: Open/Rolling/Expired
 '''
 class ProposalCall(db.Model, DBFunctions):
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
     deadline_text = db.Column(db.String(50))
-    deadline_time = db.Column(db.Interval(native=True))
-    award_amount = db.Column(db.String(40), nullable=False)
+    deadline_time = db.Column(db.Date)
+    award_amount = db.Column(db.Float, nullable=False)
+    amount_left = db.Column(db.Float, nullable=False)
     title = db.Column(db.String(100), nullable=False)
     short_text = db.Column(db.String(500), nullable=False)
     text_description = db.Column(db.Text(),  nullable=False)
     target_audience = db.Column(db.Text(), nullable=False)
     eligibil_text = db.Column(db.Text(), nullable=False)
-    duration = db.Column(db.Interval(native=True))
+    duration = db.Column(db.String(50))
     report_guidelines = db.Column(db.Text(), nullable=False)
     files = db.relationship('ProposalCallFiles', backref='call', lazy=True)
     start_date = db.Column(db.Date())
     start_date_end = db.Column(db.Date())
     contact = db.Column(db.String(75), nullable=False)
 
-class ProposalCallFiles(FileStore, db.Model):
-    id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
+class ProposalThemes(db.Model, DBFunctions):
+    id = db.Column(db.Integer, primary_key=True)
+    prop_id = db.Column(db.Integer, db.ForeignKey('proposal_call.id'), nullable=False)
+    theme_name = db.Column(db.String(100), nullable=False, unique=True)
+
+class ProposalCallFiles(FileStore, db.Model, DBFunctions):
+    id = db.Column(db.Integer, primary_key=True)
     prop_id = db.Column(db.Integer, db.ForeignKey('proposal_call.id'), nullable=False)
 
 class ShortProposalSchema(ma.ModelSchema):
@@ -222,73 +208,10 @@ class LongProposalSchema(ma.ModelSchema):
     class Meta:
         model = ProposalCall
 
-'''
-Users:
-    id
-    USER_ID (indicates type)
-    USER_NAME (friendly name)
-
-
-
-primary attrib ID generation/matching
-
-- RC Centre
-- Host uni
-- Reviewer
-'''
-class UserTypes(db.Model, DBFunctions):
-    id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
-    user_id = db.Column(db.Integer, unique=True, nullable=False)
-    user_name = db.Column(db.String(50), nullable=False)
-
 
 '''
-
 Application:
-    Title (max 30 words)
-    Duration (months)
-    NRP Area: big list
-    Textbox (250 words)
-    Ethical issues:
-        2 statements:
-            animals?
-            human bio material?
-    applicants location (country)
-    co-applicant-list
-    list of collaborators:
-        name
-        organisation
-        email
-    abstract (max 200w)
-    lay ab (max 100w)
-    PDF/File doc(s)
-    Declaration ("I agree with ...")
-
-Should be able to have a draft (completed bool?)/seperate table
 '''
-class ProposalApplication(db.Model, DBFunctions):
-    id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
-    proposal_id = db.Column(db.Integer, db.ForeignKey('proposal_call.id'), nullable=False)
-    title = db.Column(db.Text, nullable=False)
-    duration = db.Column(db.Interval(native=True))
-    nrp_area = db.Column(db.Integer, db.ForeignKey('nrp_area.nrp_id'), nullable=False)
-    textbox = db.Column(db.Text, nullable=False)
-    animal_statement = db.Column(db.Text, nullable=False)
-    human_statement = db.Column(db.Text, nullable=False)
-    applicant_country = db.Column(db.String(75), nullable=False)
-    #list_of_co_applicants = "??"
-    #list_of_collabs = "??"
-    abstract = db.Column(db.Text, nullable=False)
-    lay_abstract = db.Column(db.Text, nullable=False)
-    signed = db.Column(db.Boolean, nullable=False)
-    # Relationship (1-many)
-    files = db.relationship('ApplicationFiles', backref='proposal', lazy=True)
-
-
-class ApplicationFiles(FileStore, db.Model):
-    id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
-    prop_id = db.Column(db.Integer, db.ForeignKey('proposal_application.id'), nullable=False)
-
 class NrpArea(db.Model, DBFunctions):
     nrp_id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
     nrp_title = db.Column(db.String(200), nullable=False)
@@ -297,16 +220,96 @@ class NrpSchema(ma.ModelSchema):
     class Meta:
         model = NrpArea
 
+
+class ProposalApplication(db.Model, DBFunctions):
+    id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
+    proposal_id = db.Column(db.Integer, db.ForeignKey('proposal_call.id'), nullable=False)
+    applicant = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    title = db.Column(db.Text, nullable=False)
+    duration = db.Column(db.String(60), nullable=False)
+    amount_required = db.Column(db.Float, nullable=False)
+    nrp_area = db.Column(db.Integer, db.ForeignKey('nrp_area.nrp_id'), nullable=False)
+    textbox = db.Column(db.Text, nullable=False)
+    animal_statement = db.Column(db.Text, nullable=False)
+    human_statement = db.Column(db.Text, nullable=False)
+    applicant_country = db.Column(db.String(75), nullable=False)
+    list_of_co_applicants = db.relationship('CoApplicants', backref='propapp', lazy=True)
+    list_of_collaborators = db.relationship('ApplicationCollaborators', backref='propapp', lazy=True)
+    abstract = db.Column(db.Text, nullable=False)
+    lay_abstract = db.Column(db.Text, nullable=False)
+    signed = db.Column(db.Boolean, nullable=False)
+    files = db.relationship('ApplicationFiles', backref='propapp', lazy=True)
+
+
+class ApplicationFiles(FileStore, db.Model, DBFunctions):
+    id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
+    app_id = db.Column(db.Integer, db.ForeignKey('proposal_application.id'), nullable=False)
+
+class CoApplicants(db.Model, DBFunctions):
+    id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
+    app_id = db.Column(db.Integer, db.ForeignKey('proposal_application.id'), nullable=False)
+    co_user = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+
+class ApplicationCollaborators(db.Model, DBFunctions):
+    id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
+    app_id = db.Column(db.Integer, db.ForeignKey('proposal_application.id'), nullable=False)
+    name = db.Column(db.String(80), nullable=False)
+    organization = db.Column(db.String(80), nullable=False)
+    email = db.Column(db.String(70), nullable=False)
+
+class ProposalDraft(db.Model, DBFunctions):
+    id = db.Column(db.Integer, primary_key=True)
+    app_id = db.Column(db.Integer, db.ForeignKey('proposal_application.id'), nullable=False)
+    applicant = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    draft = db.Column(db.JSON, nullable=False)
+
+class Reviews(db.Model, DBFunctions):
+    id = db.Column(db.Integer, primary_key=True)
+    app_id = db.Column(db.Integer, db.ForeignKey('proposal_application.id'), nullable=False)
+    themes = db.relationship('Themes', backref='review', lazy=True)
+
+class Themes(db.Model, DBFunctions):
+    id = db.Column(db.Integer, primary_key=True)
+    review_id = db.Column(db.Integer, db.ForeignKey('reviews.id'), nullable=False)
+    theme_critique = db.Column(db.Text, nullable=False)
+    theme_name = db.Column(db.String(100), db.ForeignKey('proposal_themes.theme_name'), nullable=False)
+    theme_rating = db.Column(db.Integer, nullable=False)
+
+class PendingReviews(db.Model, DBFunctions):
+    id = db.Column(db.Integer, primary_key=True)
+    reviewer_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    app_id = db.Column(db.Integer, db.ForeignKey('proposal_application.id'), nullable=False)
+    deadline = db.Column(db.Date)
+
 '''
 
 GRANT:
-start
-end
-amt
-funding body
-funding programme
-status
 primary attrib (15/SIRG/3293)
 '''
 class AwardGrant(db.Model, DBFunctions):
-    id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
+    status = db.Column(db.Boolean, default=True)
+    amount = db.Column(db.Float, nullable=False)
+    funding_body = db.Column(db.String(60), nullable=False)
+    funding_programme = db.Column(db.String(90), nullable=False)
+    primary_attrib = db.Column(db.String(60), nullable=False, unique=True)
+    pi = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    start_date = db.Column(db.Date, nullable=False)
+    end_date = db.Column(db.Date)
+
+class RCTeam(db.Model, DBFunctions):
+    team_id = db.Column(db.Integer, primary_key=True)
+    team_name = db.Column(db.String(100), nullable=False)
+    team_desc = db.Column(db.Text)
+    primary_attrib = db.Column(db.ForeignKey('award_grant.primary_attrib'), nullable=False)
+    team_members = db.relationship('Users', backref='rcteam', lazy=True)
+
+class RCTeamMembers(db.Model, DBFunctions):
+    id = db.Column(db.Integer, primary_key=True)
+    team_id = db.Column(db.ForeignKey('rc_team.team_id'), nullable=False)
+    team_member = db.Column(db.ForeignKey('users.id'), nullable=False)
+    team_member_position = db.Column(db.String(70), nullable=False)
+    start_date = db.Column(db.Date, nullable=False)
+    end_date = db.Column(db.Date)
+    co_pi = db.Column(db.Boolean, default=False, nullable=False)
+    pi = db.Column(db.Boolean, default=False, nullable=False)
