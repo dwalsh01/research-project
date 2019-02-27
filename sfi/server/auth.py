@@ -182,31 +182,16 @@ def register():
 
 
 
+'''
+Profiles
+&&
+Related Information
+'''
 @bp.route('/api/get_teams', methods=['GET'])
 @login_required
 def get_teams():
     return jsonify({"teams": sampleTeams }), 200
 
-@bp.route('/api/insert_education', methods=['GET'])
-@login_required
-def insert_education():
-    user = current_user
-    educ = Education(user.id, "Bachelors of Science", "Computer Science", "University College Cork", "Cork, Ireland", "01/01/2020")
-    try:
-        educ.saveToDB()
-        json_response = {
-                'status': 'success',
-                'message': 'Successfully registered'
-            }
-        return jsonify(json_response), 201
-    except IntegrityError as e:
-            short_error = e.orig.diag.message_primary
-            invalid_format = {
-                'status': 'failure',
-                'message': 'invalid_format',
-                'error': short_error
-            }
-            return jsonify(invalid_format), 400
 
 @bp.route('/profile/education', methods=['POST'])
 def add_education():
