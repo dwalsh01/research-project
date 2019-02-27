@@ -7,8 +7,9 @@ from flasgger import swag_from, validate
 from passlib.hash import pbkdf2_sha256
 from sqlalchemy.exc import IntegrityError
 
-from .models import Users, UsersSchema, Education, EducationSchema
+from .models import Users, UsersSchema, Education, EducationSchema, UserTypes
 from sfi.utils import get_project_root
+from .common_functions import post_request_short
 
 import os
 from werkzeug.utils import secure_filename
@@ -179,6 +180,7 @@ def register():
     existing = Users.query.filter_by(email=user_object.get('email')).first()
 
     if not existing:
+<<<<<<< HEAD
         mapping = Users.convertToSchema(user_object)
         try:
             new_user = Users(**mapping)
@@ -198,6 +200,12 @@ def register():
                 'error': short_error
             }
             return jsonify(invalid_format), 400
+=======
+        mapping = Users.convertToSchema(post_request)
+        user_type = UserTypes.query.filter_by(user_name="researcher").first()
+        mapping["user_type"] = user_type.user_id
+        return post_request_short(Users, mapping, "Successfully registered")
+>>>>>>> efb5a78088ac46eec41d48b1bfde4b6f188bd299
     else:
         fail_response = {
             'status': 'failure',
@@ -205,31 +213,18 @@ def register():
         }
         return jsonify(fail_response), 400
 
+
+
+'''
+Profiles
+&&
+Related Information
+'''
 @bp.route('/api/get_teams', methods=['GET'])
 @login_required
 def get_teams():
     return jsonify({"teams": sampleTeams }), 200
 
-@bp.route('/api/insert_education', methods=['GET'])
-@login_required
-def insert_education():
-    user = current_user
-    educ = Education(user.id, "Bachelors of Science", "Computer Science", "University College Cork", "Cork, Ireland", "01/01/2020")
-    try:
-        educ.saveToDB()
-        json_response = {
-                'status': 'success',
-                'message': 'Successfully registered'
-            }
-        return jsonify(json_response), 201
-    except IntegrityError as e:
-            short_error = e.orig.diag.message_primary
-            invalid_format = {
-                'status': 'failure',
-                'message': 'invalid_format',
-                'error': short_error
-            }
-            return jsonify(invalid_format), 400
 
 @bp.route('/profile/education', methods=['POST'])
 def add_education():
