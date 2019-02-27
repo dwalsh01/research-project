@@ -257,11 +257,15 @@ class ApplicationCollaborators(db.Model, DBFunctions):
     organization = db.Column(db.String(80), nullable=False)
     email = db.Column(db.String(70), nullable=False)
 
-class ProposalDraft(db.Model, DBFunctions):
+class ApplicationDraft(db.Model, DBFunctions):
     id = db.Column(db.Integer, primary_key=True)
-    app_id = db.Column(db.Integer, db.ForeignKey('proposal_application.id'), nullable=False)
+    prop_id = db.Column(db.Integer, db.ForeignKey('proposal_call.id'), nullable=False)
     applicant = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     draft = db.Column(db.JSON, nullable=False)
+
+class ApplicationDraftSchema(ma.ModelSchema):
+    class Meta:
+        model = ApplicationDraft
 
 class Reviews(db.Model, DBFunctions):
     id = db.Column(db.Integer, primary_key=True)

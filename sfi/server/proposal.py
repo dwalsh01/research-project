@@ -2,9 +2,10 @@ import os
 from flask import Blueprint, jsonify, request
 from flasgger import swag_from, validate
 from sfi.utils import get_project_root
-from .models import ProposalCall, LongProposalSchema, ShortProposalSchema
-from sqlalchemy.exc import IntegrityError
+from flask_login import current_user
+from .models import ProposalCall, LongProposalSchema, ShortProposalSchema, ApplicationDraft, ApplicationDraftSchema
 from .common_functions import post_request_short
+
 
 swagger_prop = os.path.join(get_project_root(), "swagger", "api-proposal.yml")
 bp = Blueprint('proposal', __name__, url_prefix="/calls")
@@ -38,3 +39,57 @@ def add_proposal():
         "message": "No JSON data provided"
     }
     return jsonify(resp), 400
+
+
+@bp.route('/apply/<int:call_id>/draft', methods=['POST'])
+def save_draft(call_id):
+    '''
+    Draft =>;
+    prop_id
+    applicant-id
+    JSON
+    '''
+    json = request.get_json()
+    if json and current_user.is_authenticated:
+        applicant_id = current_user.id
+        data = {
+            "prop_id": call_id,
+            "applicant": applicant_id,
+            "draft": json
+        }
+        existing_draft = ApplicationDraft.query.filter_by(prop_id=call_id, applicant=applicant_id).first()
+        if existing_draft:
+            existing_draft.draft = json
+            existing_draft.saveToDB()
+            return 'hey', 200
+        else:
+            return post_request_short(ApplicationDraft, data, "Saved draft")
+
+    resp = {
+        "status": "failure",
+        "message": "Please log-in or provide valid JSON"
+    }
+    return jsonify(resp), 400
+
+
+@bp.route('/apply/<int:call_id>/draft', methods=['GET'])
+def get_draft(call_id):
+    if current_user.is_authenticated:
+        applicant_id = current_user.id
+        draft = ApplicationDraft.query.filter_by(prop_id=call_id, applicant=applicant_id).first()
+        if draft:
+            data = ApplicationDraftSchema().dump(draft).data
+            data['applicant'] = applicant_id
+            data['prop_id'] = call_id
+            return jsonify(data), 200
+        else:
+            return jsonify({}), 404
+    resp = {
+        "status": "failure",
+        "message": "Please log-in"
+    }
+    return jsonify(resp), 400
+
+@bp.route('/apply/<int:call_id>', methods=['POST'])
+def apply(call_id):
+    return jsonify(call_id), 500
