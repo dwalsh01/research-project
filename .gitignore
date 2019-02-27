@@ -47,5 +47,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# Too messy for now
+migrations/
 
 UPLOAD_FOLDER/
