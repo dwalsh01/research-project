@@ -166,9 +166,9 @@ def register():
     post_request = request.get_json()
     user_object = {
         "first_name": post_request.get('first_name'),
-	    "second_name": post_request.get('last_name'),
-	    "job_title": post_request.get('job_title'),
-	    "prefix": post_request.get('prefix'),
+        "second_name": post_request.get('last_name'),
+        "job_title": post_request.get('job_title'),
+        "prefix": post_request.get('prefix'),
         "suffix": post_request.get('suffix'),
         "phone": post_request.get('phone'),
         "phone_extension": post_request.get('phone_extension'),
@@ -180,32 +180,10 @@ def register():
     existing = Users.query.filter_by(email=user_object.get('email')).first()
 
     if not existing:
-<<<<<<< HEAD
-        mapping = Users.convertToSchema(user_object)
-        try:
-            new_user = Users(**mapping)
-            new_user.saveToDB()
-
-            json_response = {
-                'status': 'success',
-                'message': 'Successfully registered'
-            }
-            return jsonify(json_response), 201
-
-        except IntegrityError as e:
-            short_error = e.orig.diag.message_primary
-            invalid_format = {
-                'status': 'failure',
-                'message': 'invalid_format',
-                'error': short_error
-            }
-            return jsonify(invalid_format), 400
-=======
         mapping = Users.convertToSchema(post_request)
         user_type = UserTypes.query.filter_by(user_name="researcher").first()
         mapping["user_type"] = user_type.user_id
         return post_request_short(Users, mapping, "Successfully registered")
->>>>>>> efb5a78088ac46eec41d48b1bfde4b6f188bd299
     else:
         fail_response = {
             'status': 'failure',
