@@ -21,5 +21,8 @@ the PendingReviews table
 '''
 @bp.route('/pending/<int:user_id')
 def pending_reviews(user_id):
-    pass
-
+    
+    pendingreview = PendingReviews.filter_by(reviewer_id=user_id)
+    if pendingreview is None:
+        return '', 404
+    return jsonify(pendingreview)
