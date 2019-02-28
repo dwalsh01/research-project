@@ -192,16 +192,16 @@ def get_teams():
     return jsonify({"teams": sampleTeams }), 200
 
 
-@bp.route('/profile/education', methods=['POST'])
-def add_education():
-    post_request = request.get_json()
+# @bp.route('/profile/education', methods=['POST'])
+# def add_education():
+#     post_request = request.get_json()
 
 
 @bp.route('/profile/education', methods=['GET'])
 @login_required
 def get_education():
     user = current_user
-    existing = Education.query.filter_by(person_id=user.id).first()
+    existing = Education.query.filter_by(user_id=user.id).first()
     if existing:
         edu_schema = EducationSchema()
         edu = edu_schema.dump(existing)
