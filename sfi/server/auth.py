@@ -164,20 +164,8 @@ def current():
 @swag_from(swagger_auth, methods=['POST'])
 def register():
     post_request = request.get_json()
-    user_object = {
-        "first_name": post_request.get('first_name'),
-        "second_name": post_request.get('last_name'),
-        "job_title": post_request.get('job_title'),
-        "prefix": post_request.get('prefix'),
-        "suffix": post_request.get('suffix'),
-        "phone": post_request.get('phone'),
-        "phone_extension": post_request.get('phone_extension'),
-        "email": post_request.get('email'),
-        "password": post_request.get('password'),
-        "orcid": post_request.get('orcid')
-    }
     validate(post_request, 'Researcher', swagger_auth)
-    existing = Users.query.filter_by(email=user_object.get('email')).first()
+    existing = Users.query.filter_by(email=post_request.get('email')).first()
 
     if not existing:
         mapping = Users.convertToSchema(post_request)
