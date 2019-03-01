@@ -1,77 +1,172 @@
-from flask import Blueprint, request, jsonify, redirect, url_for
+import os.path
+from flask import Blueprint, request, jsonify, redirect, url_for, Flask
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
-from passlib.hash import sha256_crypt
+from flasgger import swag_from, validate
+from passlib.hash import pbkdf2_sha256
 
-from .models import Users
+from .models import Users, UsersSchema, Education, EducationSchema, UserTypes
+from sfi.utils import get_project_root
+from .common_functions import post_request_short
 
 
-
+swagger_auth = os.path.join(get_project_root(), "swagger", "api-auth.yml")
 bp = Blueprint('auth', __name__)
-
 login_manager = LoginManager()
+
+sampleTeams = [
+    {
+        "id": 1,
+        "person_id": 6,
+        "start_date": "01/01/2019",
+        "end_date": "01/02/2019",
+        "name": "The A Team",
+        "position": "Administrator",
+        "primary_attribution": 1
+    },
+    {
+        "id": 1,
+        "person_id": 6,
+        "start_date": "01/01/2019",
+        "end_date": "01/03/2019",
+        "name": "The B Team",
+        "position": "Administrator",
+        "primary_attribution": 2
+    },
+    {
+        "id": 1,
+        "person_id": 6,
+        "start_date": "03/01/2019",
+        "end_date": "05/02/2019",
+        "name": "The C Team",
+        "position": "Researcher",
+        "primary_attribution": 3
+    },
+    {
+        "id": 1,
+        "person_id": 6,
+        "start_date": "02/03/2019",
+        "end_date": "05/05/2019",
+        "name": "The D Team",
+        "position": "Researcher",
+        "primary_attribution": 5
+    }
+]
+# THIS WILL NEED TO BE MOVED I THINK THIS WILL
+# HANDLE THE VARIOUS ERROR RESPONSE TO FRONT END (HOPEFULLY)
+class InvalidUsage(Exception):
+    status_code = 400
+
+    def __init__(self, message, status_code=None, payload=None):
+        Exception.__init__(self)
+        self.message = message
+        if status_code is not None:
+            self.status_code = status_code
+        self.payload = payload
+
+    def to_dict(self):
+        rv = dict(self.payload or ())
+        rv['message'] = self.message
+        return rv
+
+@bp.app_errorhandler(InvalidUsage)
+def handle_invalid_usage(error):
+    response = jsonify(error.to_dict())
+    response.status_code = error.status_code
+    return response
+
+# END OF WHAT NEEDS TO BE MOVED
+
+
 
 @login_manager.user_loader
 def user_loader(user_id):
     return Users.query.get(user_id)
 
-
 @bp.route('/login_user' , methods=['POST'])
 def login():
     content = request.get_json()
+    if current_user.is_authenticated:
+        return redirect(url_for("serve"))
     user = Users.query.filter_by(email=content['email']).first()
     if user:
-        if sha256_crypt.verify(content['password'], user.password):
+        if pbkdf2_sha256.verify(content['password'], user.password):
             login_user(user, remember=True)
-            return jsonify(user.serialize), 200
+            user_schema = UsersSchema()
+            return user_schema.jsonify(user), 200
         else:
-            return '', 400
+            raise InvalidUsage(message='Password incorrect, please try again', status_code=400)
+    else:
+        raise InvalidUsage(message='Email incorrect, please try again.', status_code=400)
 
 
 
-@bp.route("/logout")
+@bp.route("/api/logout")
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for("serve"))
+    # keep this here for testing, comment it out and use bottom
+    # return statement with production build
+    return jsonify({"logout": "success"}), 200
+    # return redirect(url_for("serve"))
 
 
 
-@bp.route('/current')
+@bp.route('/api/user')
 def current():
     if current_user.is_authenticated:
-        return jsonify(current_user.serialize)
-    return jsonify({"user": "False"}), 200
+        user_schema = UsersSchema()
+        user = user_schema.dump(current_user)
+        return jsonify({"user": user.data  }), 200
+    return jsonify({"user": 0}), 200
+
 
 @bp.route('/register', methods=['POST'])
+@swag_from(swagger_auth, methods=['POST'])
 def register():
     post_request = request.get_json()
-
+    validate(post_request, 'Researcher', swagger_auth)
     existing = Users.query.filter_by(email=post_request.get('email')).first()
+
     if not existing:
-        new_user = Users(
-            post_request.get('first_name'),
-            post_request.get('second_name'),
-            post_request.get('job_title'),
-            post_request.get('prefix'),
-            post_request.get('suffix'),
-            post_request.get('phone'),
-            post_request.get('phone_extension'),
-            post_request.get('email'),
-            post_request.get('password'),
-            post_request.get('orcid')
-        )
-
-        new_user.saveToDB()
-
-        json_response = {
-            'status': 'success',
-            'message': 'Successfully registered'
-        }
-        return jsonify(json_response), 201
+        mapping = Users.convertToSchema(post_request)
+        user_type = UserTypes.query.filter_by(user_name="researcher").first()
+        mapping["user_type"] = user_type.user_id
+        return post_request_short(Users, mapping, "Successfully registered")
     else:
         fail_response = {
             'status': 'failure',
-            'message': f'User with that email already exists.'
+            'message': 'User with that email already exists'
         }
-        return jsonify(fail_response), 202
-        return jsonify({'dontcomplain': 'thanks'}), 200
+        return jsonify(fail_response), 400
+
+
+
+'''
+Profiles
+&&
+Related Information
+'''
+@bp.route('/api/get_teams', methods=['GET'])
+@login_required
+def get_teams():
+    return jsonify({"teams": sampleTeams }), 200
+
+
+# @bp.route('/profile/education', methods=['POST'])
+# def add_education():
+#     post_request = request.get_json()
+
+
+@bp.route('/profile/education', methods=['GET'])
+@login_required
+def get_education():
+    user = current_user
+    existing = Education.query.filter_by(user_id=user.id).first()
+    if existing:
+        edu_schema = EducationSchema()
+        edu = edu_schema.dump(existing)
+        return jsonify({"education": edu.data}), 200
+    else:
+        return jsonify({"message": "No education information available"})
+
+

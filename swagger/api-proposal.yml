@@ -1,0 +1,43 @@
+Endpoint for listing CFPs (Call for Proposal)
+Should be publicly viewable
+---
+descripton: "Lists all CFPs"
+definitions:
+  Proposal:
+    type: object
+    properties:
+      deadline_time:
+        type: string
+      text_description:
+        type: string
+      target_audience:
+        type: string
+      eligibil_text:
+        type: string
+      duration:
+        type: string
+      report_guidelines:
+        type: string
+      files:
+        type: array
+        items:
+          type: file
+          format: application/pdf
+      start_date:
+        type: string
+        format: date
+      start_date_end:
+        type: string
+        format: date
+      contact:
+        type: string
+        format: email
+
+responses:
+  200:
+    description: "A list of proposals"
+    schema:
+      type: array
+      items:
+        $ref: '#/definitions/Proposal'
+

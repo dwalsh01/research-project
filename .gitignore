@@ -46,5 +46,12 @@ htmlcov/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# "in theory" you'd hide sendgrid info
 sendgrid.env
-sendgrid.env
+
+# Too messy for now
+migrations/
+
+# hide uploads
+UPLOAD_FOLDER/

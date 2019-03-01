@@ -1,0 +1,24 @@
+Endpoint for adding a NRP area
+NRP areas are used in researcher applications.
+Should only be accessible by SFI admins
+---
+description: "Adds a new NRP area."
+parameters:
+  - name: "nrp"
+    in: "body"
+    schema:
+      $ref: '#/definitions/NRP'
+    type: string
+    required: true
+definitions:
+  NRP:
+    type: object
+    properties:
+      title:
+        type: string
+responses:
+  201:
+    description: NRP added
+  400:
+    description: Bad request
+

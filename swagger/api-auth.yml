@@ -1,0 +1,43 @@
+Endpoint for registering a new researcher.
+The API is provided below.
+---
+description: "Registers a new researcher. Must provide unique emails."
+parameters:
+  - name: "researcher"
+    in: "body"
+    type: string
+    required: true
+    description: "Researcher to register"
+    schema:
+      $ref: '#/definitions/Researcher'
+definitions:
+  Researcher:
+    type: object
+    properties:
+      first_name:
+        type: string
+      second_name:
+        type: string
+      job_title:
+        type: string
+      prefix:
+        type: string
+      suffix:
+        type: string
+      phone:
+        type: string
+      phone_extension:
+        type: integer
+        format: int32
+      email:
+        type: string
+      password:
+        type: string
+      orcid:
+        type: string
+
+responses:
+  200:
+    description: A success/error message
+
+
