@@ -34,14 +34,20 @@ Users section:
 - Host university
 - RC Centre?
 '''
-class UserTypes(db.Model, DBFunctions):
-    user_id = db.Column(db.Integer, unique=True, primary_key=True)
-    user_name = db.Column(db.String(50), nullable=False, unique=True)
+class Role(db.Model, DBFunctions):
+    __tablename__ = 'roles'
+    id = db.Column(db.Integer, unique=True, primary_key=True)
+    name = db.Column(db.String(50), nullable=False, unique=True)
 
+class UserRoles(db.Model):
+    __tablename__ = 'user_roles'
+    id = db.Column(db.Integer(), primary_key=True)
+    user_id = db.Column(db.Integer(), db.ForeignKey('users.id', ondelete='CASCADE'))
+    role_id = db.Column(db.Integer(), db.ForeignKey('roles.id', ondelete='CASCADE'))
 
 class Users(UserMixin, db.Model, DBFunctions):
     id = db.Column(db.Integer, primary_key=True)
-    user_type = db.Column(db.Integer, db.ForeignKey('user_types.user_id'), nullable=False)
+    roles = db.relationship('Role', secondary='user_roles')
     f_name = db.Column(db.String(25), nullable=False)
     l_name = db.Column(db.String(30), nullable=False)
     job_title = db.Column(db.String(50), nullable=False)
@@ -257,11 +263,15 @@ class ApplicationCollaborators(db.Model, DBFunctions):
     organization = db.Column(db.String(80), nullable=False)
     email = db.Column(db.String(70), nullable=False)
 
-class ProposalDraft(db.Model, DBFunctions):
+class ApplicationDraft(db.Model, DBFunctions):
     id = db.Column(db.Integer, primary_key=True)
-    app_id = db.Column(db.Integer, db.ForeignKey('proposal_application.id'), nullable=False)
+    prop_id = db.Column(db.Integer, db.ForeignKey('proposal_call.id'), nullable=False)
     applicant = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     draft = db.Column(db.JSON, nullable=False)
+
+class ApplicationDraftSchema(ma.ModelSchema):
+    class Meta:
+        model = ApplicationDraft
 
 class Reviews(db.Model, DBFunctions):
     id = db.Column(db.Integer, primary_key=True)

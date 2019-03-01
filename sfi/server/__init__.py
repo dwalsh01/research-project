@@ -1,5 +1,5 @@
 import os.path
-from os import getenv
+from os import getenv, makedirs
 from pathlib import PurePath
 
 from flask import Flask, send_from_directory
@@ -45,6 +45,7 @@ def app_factory(config_param='sfi.server.config.DevelopmentConfig'):
     swag = Swagger(app)
 
     UPLOAD_FOLDER = 'UPLOAD_FOLDER'
+    makedirs(UPLOAD_FOLDER, exist_ok=True)
     app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
     #Blueprints

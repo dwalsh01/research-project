@@ -1,19 +1,12 @@
 import os.path
-from flask import send_from_directory, current_app, render_template, abort, \
-     Blueprint, request, jsonify, redirect, url_for, Flask, flash, request, \
-     redirect, url_for
+from flask import Blueprint, request, jsonify, redirect, url_for, Flask
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 from flasgger import swag_from, validate
 from passlib.hash import pbkdf2_sha256
-from sqlalchemy.exc import IntegrityError
 
 from .models import Users, UsersSchema, Education, EducationSchema, UserTypes
 from sfi.utils import get_project_root
 from .common_functions import post_request_short
-
-import os
-from werkzeug.utils import secure_filename
-
 
 
 swagger_auth = os.path.join(get_project_root(), "swagger", "api-auth.yml")
@@ -83,39 +76,6 @@ def handle_invalid_usage(error):
 
 # END OF WHAT NEEDS TO BE MOVED
 
-ALLOWED_EXTENSIONS = set(['pdf'])
-
-def allowed_file(filename):
-    return '.' in filename and \
-        filename.rsplit('.')[-1].lower() in ALLOWED_EXTENSIONS
-
-@bp.route('/upload_file', methods=['GET', 'POST'])
-def upload_file():
-    if request.method == 'POST':
-        # check if the post request has the file part
-        if 'file' not in request.files:
-            flash('No file part')
-            return redirect(request.url)
-        file = request.files['file']
-        # if user does not select file, browser also
-        # submit an empty part without filename
-        if file.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
-            return redirect(url_for('auth.upload_file', filename=filename))
-
-    return '''
-    <!doctype html>
-    <title>Upload new File</title>
-    <h1>Upload new File</h1>
-    <form method=post enctype=multipart/form-data>
-      <input type=file name=file>
-      <input type=submit value=Upload>
-    </form>
-    '''
 
 
 @login_manager.user_loader
@@ -164,7 +124,6 @@ def current():
 @swag_from(swagger_auth, methods=['POST'])
 def register():
     post_request = request.get_json()
-
     validate(post_request, 'Researcher', swagger_auth)
     existing = Users.query.filter_by(email=post_request.get('email')).first()
 
@@ -182,42 +141,27 @@ def register():
 
 
 
+'''
+Profiles
+&&
+Related Information
+'''
 @bp.route('/api/get_teams', methods=['GET'])
 @login_required
 def get_teams():
     return jsonify({"teams": sampleTeams }), 200
 
-@bp.route('/api/insert_education', methods=['GET'])
-@login_required
-def insert_education():
-    user = current_user
-    educ = Education(user.id, "Bachelors of Science", "Computer Science", "University College Cork", "Cork, Ireland", "01/01/2020")
-    try:
-        educ.saveToDB()
-        json_response = {
-                'status': 'success',
-                'message': 'Successfully registered'
-            }
-        return jsonify(json_response), 201
-    except IntegrityError as e:
-            short_error = e.orig.diag.message_primary
-            invalid_format = {
-                'status': 'failure',
-                'message': 'invalid_format',
-                'error': short_error
-            }
-            return jsonify(invalid_format), 400
 
-@bp.route('/profile/education', methods=['POST'])
-def add_education():
-    post_request = request.get_json()
+# @bp.route('/profile/education', methods=['POST'])
+# def add_education():
+#     post_request = request.get_json()
 
 
 @bp.route('/profile/education', methods=['GET'])
 @login_required
 def get_education():
     user = current_user
-    existing = Education.query.filter_by(person_id=user.id).first()
+    existing = Education.query.filter_by(user_id=user.id).first()
     if existing:
         edu_schema = EducationSchema()
         edu = edu_schema.dump(existing)
