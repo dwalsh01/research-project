@@ -1,5 +1,6 @@
 import os
 from flask import Blueprint, jsonify, request
+from .models import PendingReviews, PendingReviewsSchema
 
 bp = Blueprint('proposal', __name__, url_prefix="/reviews")
 
@@ -21,8 +22,8 @@ the PendingReviews table
 '''
 @bp.route('/pending/<int:user_id')
 def pending_reviews(user_id):
-    
     pendingreview = PendingReviews.filter_by(reviewer_id=user_id)
     if pendingreview is None:
         return '', 404
-    return jsonify(pendingreview)
+    schema = PendingReviewsSchema()
+    return schema.jsonify(pendingreview)

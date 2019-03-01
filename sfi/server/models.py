@@ -291,6 +291,10 @@ class PendingReviews(db.Model, DBFunctions):
     app_id = db.Column(db.Integer, db.ForeignKey('proposal_application.id'), nullable=False)
     deadline = db.Column(db.Date)
 
+class PendingReviewsSchema(ma.ModelSchema):
+    class Meta:
+        model = PendingReviews
+
 '''
 
 GRANT:
