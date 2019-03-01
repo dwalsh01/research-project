@@ -43,5 +43,5 @@ def insert_user():
 @bp.route('/testing', methods=['GET'])
 def testing():
     if request.method == 'GET':
-        return jsonify(sampleData)
+        return jsonify(sampleData), 200
 
