@@ -1,4 +1,4 @@
-from sfi.server.models import Users, UserTypes
+from sfi.server.models import Users, Role
 import json
 import random
 
@@ -6,13 +6,13 @@ import random
 def test_add_user_types(client, app):
     types = ["researcher", "admin", "reviewer"]
     with app.app_context():
-        query = UserTypes.query.all()
+        query = Role.query.all()
         if len(query) != len(types):
             for type in types:
-                new_type = UserTypes(user_name=type)
+                new_type = Role(name=type)
                 new_type.saveToDB()
 
-        query = UserTypes.query.all()
+        query = Role.query.all()
         assert len(query) == len(types)
 
 

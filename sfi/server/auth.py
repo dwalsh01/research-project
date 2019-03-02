@@ -4,7 +4,7 @@ from flask_login import LoginManager, login_user, logout_user, current_user, log
 from flasgger import swag_from, validate
 from passlib.hash import pbkdf2_sha256
 
-from .models import Users, UsersSchema, Education, EducationSchema, UserTypes
+from .models import Users, UsersSchema, Education, EducationSchema, Role
 from sfi.utils import get_project_root
 from .common_functions import post_request_short
 
@@ -129,8 +129,8 @@ def register():
 
     if not existing:
         mapping = Users.convertToSchema(post_request)
-        user_type = UserTypes.query.filter_by(user_name="researcher").first()
-        mapping["user_type"] = user_type.user_id
+        user_type = Role.query.filter_by(name="researcher").first()
+        mapping["roles"] = [user_type]
         return post_request_short(Users, mapping, "Successfully registered")
     else:
         fail_response = {
