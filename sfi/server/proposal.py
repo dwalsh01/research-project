@@ -61,7 +61,7 @@ def save_draft(call_id):
         if existing_draft:
             existing_draft.draft = json
             existing_draft.saveToDB()
-            return 'hey', 200
+            return jsonify({'message': 'Successfully updated existing draft!'}), 200
         else:
             return post_request_short(ApplicationDraft, data, "Saved draft")
 
@@ -90,6 +90,21 @@ def get_draft(call_id):
     }
     return jsonify(resp), 400
 
+@bp.route('/apply/draft/all', methods=['GET'])
+def get_all():
+    if current_user.is_authenticated:
+        applicant_id = current_user.id
+        draft = ApplicationDraft.query.filter_by(applicant=applicant_id).all()
+        if draft:
+            data = ApplicationDraftSchema(many=True).dump(draft)
+            return jsonify(data.data), 200
+        else:
+            return jsonify({}), 404
+    resp = {
+        "status": "failure",
+        "message": "Please log-in"
+    }
+    return jsonify(resp), 400
 @bp.route('/apply/<int:call_id>', methods=['POST'])
 def apply(call_id):
     return jsonify(call_id), 500
