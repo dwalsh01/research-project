@@ -3,7 +3,9 @@ from flask import Blueprint, jsonify, request
 from flasgger import swag_from, validate
 from sfi.utils import get_project_root
 from flask_login import current_user
-from .models import ProposalCall, LongProposalSchema, ShortProposalSchema, ApplicationDraft, ApplicationDraftSchema
+from .models import ProposalCall, LongProposalSchema, ShortProposalSchema, \
+    ApplicationDraft, ApplicationDraftSchema
+
 from .common_functions import post_request_short
 
 
@@ -108,4 +110,12 @@ def get_all():
 
 @bp.route('/apply/<int:call_id>', methods=['POST'])
 def apply(call_id):
-    return jsonify(call_id), 500
+    post_request = request.get_json()
+    if post_request:
+        return post_request_short(ProposalApplication, post_request, "Application Submitted")
+
+    resp = {
+        "status": "failure",
+        "message": "No JSON data provided"
+    }
+    return jsonify(resp), 400
