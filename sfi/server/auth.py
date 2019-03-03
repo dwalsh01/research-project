@@ -4,7 +4,7 @@ from flask_login import LoginManager, login_user, logout_user, current_user, log
 from flasgger import swag_from, validate
 from passlib.hash import pbkdf2_sha256
 
-from .models import Users, UsersSchema, Education, EducationSchema, Role
+from .models import Users, UsersSchema, Education, EducationSchema, Role, RoleSchema
 from sfi.utils import get_project_root
 from .common_functions import post_request_short
 
@@ -77,6 +77,15 @@ def handle_invalid_usage(error):
 # END OF WHAT NEEDS TO BE MOVED
 
 
+def user_info(user):
+    user_roles = user.roles
+    user_role_data = RoleSchema(many=True).dump(user_roles)
+    user_data = UsersSchema().dump(user)
+    resp =  {
+         "user": user_data.data,
+        "roles": user_role_data.data
+    }
+    return jsonify(resp), 200
 
 @login_manager.user_loader
 def user_loader(user_id):
@@ -91,8 +100,7 @@ def login():
     if user:
         if pbkdf2_sha256.verify(content['password'], user.password):
             login_user(user, remember=True)
-            user_schema = UsersSchema()
-            return user_schema.jsonify(user), 200
+            return user_info(user)
         else:
             raise InvalidUsage(message='Password incorrect, please try again', status_code=400)
     else:
@@ -114,9 +122,7 @@ def logout():
 @bp.route('/api/user')
 def current():
     if current_user.is_authenticated:
-        user_schema = UsersSchema()
-        user = user_schema.dump(current_user)
-        return jsonify({"user": user.data  }), 200
+        return user_info(current_user)
     return jsonify({"user": 0}), 200
 
 

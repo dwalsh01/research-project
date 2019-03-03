@@ -105,6 +105,7 @@ def get_all():
         "message": "Please log-in"
     }
     return jsonify(resp), 400
+
 @bp.route('/apply/<int:call_id>', methods=['POST'])
 def apply(call_id):
     return jsonify(call_id), 500

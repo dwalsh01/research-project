@@ -39,6 +39,10 @@ class Role(db.Model, DBFunctions):
     id = db.Column(db.Integer, unique=True, primary_key=True)
     name = db.Column(db.String(50), nullable=False, unique=True)
 
+class RoleSchema(ma.ModelSchema):
+    class Meta:
+        model = Role
+
 class UserRoles(db.Model):
     __tablename__ = 'user_roles'
     id = db.Column(db.Integer(), primary_key=True)
