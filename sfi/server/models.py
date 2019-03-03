@@ -140,14 +140,12 @@ class Societies(db.Model, DBFunctions):
     society_name = db.Column(db.String(50))
     membership_type = db.Column(db.Boolean)
 
-
 class Awards(db.Model, DBFunctions):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     year = db.Column(db.Integer)
     awarding_body = db.Column(db.String(50))
     award_details = db.Column(db.String(100))
-
 
 class Funding(db.Model, DBFunctions):
     id = db.Column(db.Integer, primary_key= True, unique=True, nullable=False)
@@ -327,3 +325,84 @@ class RCTeamMembers(db.Model, DBFunctions):
     end_date = db.Column(db.Date)
     co_pi = db.Column(db.Boolean, default=False, nullable=False)
     pi = db.Column(db.Boolean, default=False, nullable=False)
+
+
+class RCTeamMembersSchema(ma.ModelSchema):
+    class Meta:
+        model = RCTeamMembers
+
+class RCTeamSchema(ma.ModelSchema):
+    class Meta:
+        model = RCTeam
+
+class AwardGrantSchema(ma.ModelSchema):
+    class Meta:
+        model = AwardGrant
+
+class ThemesSchema(ma.ModelSchema):
+    class Meta:
+        model = Themes
+
+class ReviewsSchema(ma.ModelSchema):
+    class Meta:
+        model = Reviews
+
+class ApplicationCollaboratorsSchema(ma.ModelSchema):
+    class Meta:
+        model = ApplicationCollaborators
+
+class CoApplicantsSchema(ma.ModelSchema):
+    class Meta:
+        model = CoApplicants
+
+class ApplicationFilesSchema(ma.ModelSchema):
+    class Meta:
+        model = ApplicationFiles
+
+class ProposalApplicationSchema(ma.ModelSchema):
+    class Meta:
+        model = ProposalApplication
+
+class EducationSchema(ma.ModelSchema):
+    class Meta:
+        model = Education
+
+class ProposalCallFilesSchema(ma.ModelSchema):
+    class Meta:
+        model = ProposalCallFiles
+
+class ProposalThemesSchema(ma.ModelSchema):
+    class Meta:
+        model = ProposalThemes
+
+class ProposalCallSchema(ma.ModelSchema):
+    class Meta:
+        model = ProposalCall
+
+class TeamsSchema(ma.ModelSchema):
+    class Meta:
+        model = Teams
+
+class FundingSchema(ma.ModelSchema):
+    class Meta:
+        model = Funding
+
+class AwardsSchema(ma.ModelSchema):
+    class Meta:
+        model = Awards
+
+class SocietiesSchema(ma.ModelSchema):
+    class Meta:
+        model = Societies
+
+class EmploymentSchema(ma.ModelSchema):
+    class Meta:
+        model = Employment
+
+class UserRolesSchema(ma.ModelSchema):
+    class Meta:
+        model = UserRoles
+
+class RoleSchema(ma.ModelSchema):
+    class Meta:
+        model = Role
