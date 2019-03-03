@@ -6,6 +6,7 @@ from passlib.hash import pbkdf2_sha256
 
 from .models import Users, UsersSchema, Education, EducationSchema, Role, RoleSchema
 from sfi.utils import get_project_root
+from sfi.server.errors.errors import InvalidUsage
 from .common_functions import post_request_short
 
 
@@ -51,30 +52,6 @@ sampleTeams = [
         "primary_attribution": 5
     }
 ]
-# THIS WILL NEED TO BE MOVED I THINK THIS WILL
-# HANDLE THE VARIOUS ERROR RESPONSE TO FRONT END (HOPEFULLY)
-class InvalidUsage(Exception):
-    status_code = 400
-
-    def __init__(self, message, status_code=None, payload=None):
-        Exception.__init__(self)
-        self.message = message
-        if status_code is not None:
-            self.status_code = status_code
-        self.payload = payload
-
-    def to_dict(self):
-        rv = dict(self.payload or ())
-        rv['message'] = self.message
-        return rv
-
-@bp.app_errorhandler(InvalidUsage)
-def handle_invalid_usage(error):
-    response = jsonify(error.to_dict())
-    response.status_code = error.status_code
-    return response
-
-# END OF WHAT NEEDS TO BE MOVED
 
 
 def user_info(user):
@@ -83,7 +60,7 @@ def user_info(user):
     user_data = UsersSchema().dump(user)
     resp =  {
          "user": user_data.data,
-        "roles": user_role_data.data
+         "roles": user_role_data.data
     }
     return jsonify(resp), 200
 
@@ -102,9 +79,9 @@ def login():
             login_user(user, remember=True)
             return user_info(user)
         else:
-            raise InvalidUsage(message='Password incorrect, please try again', status_code=400)
+            raise InvalidUsage('Password incorrect, please try again', status_code=400)
     else:
-        raise InvalidUsage(message='Email incorrect, please try again.', status_code=400)
+        raise InvalidUsage('Email incorrect, please try again.', status_code=400)
 
 
 
@@ -139,13 +116,8 @@ def register():
         mapping["roles"] = [user_type]
         return post_request_short(Users, mapping, "Successfully registered")
     else:
-        fail_response = {
-            'status': 'failure',
-            'message': 'User with that email already exists'
-        }
-        return jsonify(fail_response), 400
-
-
+        message = 'User with that email already exists'
+        raise InvalidUsage(message, status_code=400)
 
 '''
 Profiles
@@ -173,6 +145,7 @@ def get_education():
         edu = edu_schema.dump(existing)
         return jsonify({"education": edu.data}), 200
     else:
-        return jsonify({"message": "No education information available"})
+        message = "No education information available"
+        raise InvalidUsage(message, status_code=404)
 
 

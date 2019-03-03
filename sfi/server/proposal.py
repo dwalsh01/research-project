@@ -7,7 +7,7 @@ from .models import ProposalCall, LongProposalSchema, ShortProposalSchema, \
     ApplicationDraft, ApplicationDraftSchema
 
 from .common_functions import post_request_short
-
+from sfi.server.errors.errors import InvalidUsage
 
 swagger_prop = os.path.join(get_project_root(), "swagger", "api-proposal.yml")
 bp = Blueprint('proposal', __name__, url_prefix="/calls")
@@ -36,11 +36,8 @@ def add_proposal():
         post_request["amount_left"] = post_request.get('award_amount', 0)
         return post_request_short(ProposalCall, post_request, "Proposal call added")
 
-    resp = {
-        "status": "failure",
-        "message": "No JSON data provided"
-    }
-    return jsonify(resp), 400
+    message = "No JSON data provided"
+    return InvalidUsage(message, status_code=400)
 
 
 @bp.route('/apply/<int:call_id>/draft', methods=['POST'])
