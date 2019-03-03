@@ -99,12 +99,13 @@ def get_all():
             data = ApplicationDraftSchema(many=True).dump(draft)
             return jsonify(data.data), 200
         else:
-            return jsonify({}), 404
+            return jsonify({"message": "no drafts found"}), 404
     resp = {
         "status": "failure",
         "message": "Please log-in"
     }
     return jsonify(resp), 400
+
 @bp.route('/apply/<int:call_id>', methods=['POST'])
 def apply(call_id):
     return jsonify(call_id), 500

@@ -108,7 +108,8 @@ class UsersSchema(ma.ModelSchema):
                   'phone',
                   'phone_ext',
                   'email',
-                  'orcid'
+                  'orcid',
+
                 )
 
 
