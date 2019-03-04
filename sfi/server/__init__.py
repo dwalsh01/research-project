@@ -62,6 +62,8 @@ def app_factory(config_param='sfi.server.config.DevelopmentConfig'):
     from . import proposal
     app.register_blueprint(proposal.bp)
 
+    from sfi.server import errors
+    app.register_blueprint(errors.bp)
 
     # Serve React App
     @app.route('/', defaults={'path': ''})
