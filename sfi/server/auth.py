@@ -4,7 +4,10 @@ from flask_login import LoginManager, login_user, logout_user, current_user, log
 from flasgger import swag_from, validate
 from passlib.hash import pbkdf2_sha256
 
-from .models import Users, UsersSchema, Education, EducationSchema, Role, RoleSchema
+from .models import CoApplicants, ProposalApplication, ProposalApplicationSchema, Teams,TeamsSchema, \
+Users, UsersSchema, Education, EducationSchema, Role, Awards, AwardsSchema, Societies, SocietiesSchema,\
+Employment, EmploymentSchema, Funding, FundingSchema, ProposalThemes, ProposalThemesSchema
+
 from sfi.utils import get_project_root
 from sfi.server.errors.errors import InvalidUsage
 from .common_functions import post_request_short
@@ -130,9 +133,6 @@ def get_teams():
     return jsonify({"teams": sampleTeams }), 200
 
 
-# @bp.route('/profile/education', methods=['POST'])
-# def add_education():
-#     post_request = request.get_json()
 
 
 @bp.route('/profile/education', methods=['GET'])
@@ -149,3 +149,217 @@ def get_education():
         raise InvalidUsage(message, status_code=404)
 
 
+
+@bp.route('/profile/education', methods=['POST'])
+@login_required
+def add_education():
+    post_request = request.get_json()
+    if post_request:
+        return post_request_short(Education, post_request, "Education added")
+    
+    resp = {
+        "status": "failure",
+        "message": "No JSON data provided"
+    }
+    return jsonify(resp), 400
+
+@bp.route('/profile/awards', methods=['GET'])
+@login_required
+def get_awards():
+    user = current_user
+    existing = Awards.query.filter_by(user_id=user.id).first()
+    if existing:
+        awards_schema = AwardsSchema()
+        awards = awards_schema.dump(existing)
+        return jsonify({"awards": awards.data}), 200
+    else:
+        return jsonify({"message": "No awards information available"})
+
+
+@bp.route('/profile/awards', methods=['POST'])
+@login_required
+def add_awards():
+    post_request = request.get_json()
+    if post_request:
+        return post_request_short(Awards, post_request, "Awards added")
+    
+    resp = {
+        "status": "failure",
+        "message": "No JSON data provided"
+    }
+    return jsonify(resp), 400
+
+@bp.route('/profile/societies', methods=['GET'])
+@login_required
+def get_societies():
+    user = current_user
+    existing = Societies.query.filter_by(user_id=user.id).first()
+    if existing:
+        societies_schema = SocietiesSchema()
+        societies = societies_schema.dump(existing)
+        return jsonify({"societies": societies.data}), 200
+    else:
+        return jsonify({"message": "No societies information available"})
+
+@bp.route('/profile/societies', methods=['POST'])
+@login_required
+def add_societies():
+    post_request = request.get_json()
+    if post_request:
+        return post_request_short(Societies, post_request, "Societies added")
+    
+    resp = {
+        "status": "failure",
+        "message": "No JSON data provided"
+    }
+    return jsonify(resp), 400
+
+@bp.route('/profile/employment', methods=['GET'])
+@login_required
+def get_employment():
+    user = current_user
+    existing = Employment.query.filter_by(user_id=user.id).first()
+    if existing:
+        employment_schema = EmploymentSchema()
+        employment = employment_schema.dump(existing)
+        return jsonify({"employment": employment.data}), 200
+    else:
+        return jsonify({"message": "No employment information available"})
+
+@bp.route('/profile/employment', methods=['POST'])
+@login_required
+def add_employment():
+    post_request = request.get_json()
+    if post_request:
+        return post_request_short(Employment, post_request, "Employment added")
+    
+    resp = {
+        "status": "failure",
+        "message": "No JSON data provided"
+    }
+    return jsonify(resp), 400
+
+@bp.route('/profile/funding', methods=['GET'])
+@login_required
+def get_funding():
+    user = current_user
+    existing = Funding.query.filter_by(user_id=user.id).first()
+    if existing:
+        funding_schema = FundingSchema()
+        funding = funding_schema.dump(existing)
+        return jsonify({"funding": funding.data}), 200
+    else:
+        return jsonify({"message": "No funding information available"})
+
+@bp.route('/profile/funding', methods=['POST'])
+@login_required
+def add_funding():
+    post_request = request.get_json()
+    if post_request:
+        return post_request_short(Funding, post_request, "Funding added")
+    
+    resp = {
+        "status": "failure",
+        "message": "No JSON data provided"
+    }
+    return jsonify(resp), 400
+
+@bp.route('/profile/team', methods=['GET'])
+@login_required
+def get_team():
+    user = current_user
+    existing = Teams.query.filter_by(person_id=user.id).first()
+    if existing:
+        teams_schema = TeamsSchema()
+        teams = teams_schema.dump(existing)
+        return jsonify({"teams": teams.data}), 200
+    else:
+        return jsonify({"message": "No teams information available"})
+
+@bp.route('/profile/team', methods=['POST'])
+@login_required
+def add_team():
+    post_request = request.get_json()
+    if post_request:
+        return post_request_short(Teams, post_request, "Teams added")
+    
+    resp = {
+        "status": "failure",
+        "message": "No JSON data provided"
+    }
+    return jsonify(resp), 400
+
+@bp.route('/co_applicants', methods=['GET'])
+@login_required
+def get_co_applicants():
+    user = current_user
+    existing = CoApplicants.query.filter_by(co_user=user.id).first()
+    if existing:
+        co_app_schema = CoApplicantsSchema()
+        co_app = co_app_schema.dump(existing)
+        return jsonify({"funding": co_app.data}), 200
+    else:
+        return jsonify({"message": "No Co-Applicant information available"})
+
+@bp.route('/co_applicants', methods=['POST'])
+@login_required
+def add_co_applicants():
+    post_request = request.get_json()
+    if post_request:
+        return post_request_short(CoApplicants, post_request, "Co-Applicants added")
+    
+    resp = {
+        "status": "failure",
+        "message": "No JSON data provided"
+    }
+    return jsonify(resp), 400
+
+@bp.route('/application', methods=['GET'])
+@login_required
+def get_application():
+    user = current_user
+    existing = ProposalApplication.query.filter_by(applicant=user.id).first()
+    if existing:
+        proposal_application_schema = ProposalApplicationSchema()
+        proposal_application = proposal_application_schema.dump(existing)
+        return jsonify({"proposal_application": proposal_application.data}), 200
+    else:
+        return jsonify({"message": "No Applicant information available"})
+
+@bp.route('/application', methods=['POST'])
+@login_required
+def add_application():
+    post_request = request.get_json()
+    if post_request:
+        return post_request_short(ProposalApplication, post_request, "Application added")
+    
+    resp = {
+        "status": "failure",
+        "message": "No JSON data provided"
+    }
+    return jsonify(resp), 400
+
+@bp.route('/proposal_themes', methods=['GET'])
+@login_required
+def get_proposal_themes():
+    user = current_user
+    existing = ProposalThemes.query.all()
+    if existing:
+        proposal_themes_schema = ProposalThemesSchema()
+        proposal_themes = proposal_themes_schema.dump(existing)
+        return jsonify({"proposal_themes": proposal_themes.data}), 200
+    else:
+        return jsonify({"message": "No Proposal Themes information available"})
+
+@bp.route('/proposal_themes', methods=['POST'])
+@login_required
+def add_proposal_themes():
+    post_request = request.get_json()
+    if post_request:
+        return post_request_short(ProposalThemes, post_request, "Application added")
+    
+    resp = {
+        "status": "failure",
+        "message": "No JSON data provided"
+    }
+    return jsonify(resp), 400
