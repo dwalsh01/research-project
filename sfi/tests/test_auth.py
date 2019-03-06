@@ -52,3 +52,38 @@ def test_register(client, app):
             query = Users.query.filter_by(email=test_email).first()
             assert query is not None and response.status_code == 201
 
+
+def test_admin_register(client, app):
+
+
+    f_name = ["Jeff"]
+    l_name = ["Jobs"]
+    job_title = "SFI admin"
+    prefix = "Mr"
+    suffix = "PhD"
+
+    email = "admin@sfi.com"
+
+    data = {
+        "f_name": random.choice(f_name),
+        "l_name": random.choice(l_name),
+        "job_title": random.choice(job_title),
+        "prefix":  random.choice(prefix),
+        "suffix": random.choice(suffix),
+        "phone": str(random.randint(0,999)) +"-"+ str(random.randint(0,9999999)),
+        "phone_ext": random.randint(0,999),
+        "email": email,
+        "password": "hashed"
+    }
+
+    with app.app_context():
+        # Initial check
+        query = Users.query.filter_by(email=email).first()
+        if not query:
+            user_type = Role.query.filter_by(name="admin").first()
+            data["roles"] = [user_type]
+            admin = Users(**data)
+            admin.saveToDB()
+
+            query = Users.query.filter_by(email=email).first()
+            assert query is not None
