@@ -21,6 +21,11 @@ class DBFunctions():
         db.session.add(self)
         db.session.commit()
 
+    def saveMultipleToDB(self, other):
+        db.session.add(self)
+        db.session.add_all(other)
+        db.session.commit()
+
 class FileStore:
     filename = db.Column(db.String(100), nullable=False)
     file_data = db.Column(db.LargeBinary, nullable=False)

@@ -4,9 +4,9 @@ from flasgger import swag_from, validate
 from sfi.utils import get_project_root
 from flask_login import current_user
 from .models import ProposalCall, LongProposalSchema, ShortProposalSchema, \
-    ApplicationDraft, ApplicationDraftSchema
+    ApplicationDraft, ApplicationDraftSchema, ProposalApplication, Users, CoApplicants, ApplicationCollaborators
 
-from .common_functions import post_request_short
+from .common_functions import post_request_short, attempt_insert, attempt_save
 from sfi.server.errors.errors import InvalidUsage
 
 swagger_prop = os.path.join(get_project_root(), "swagger", "api-proposal.yml")
@@ -106,14 +106,42 @@ def get_all():
     return jsonify(resp), 400
 
 
+def parse_co_applicants(co_apps, application):
+    for co_app_dict in co_apps:
+        co_app_email = co_app_dict.get('email')
+        user = Users.query.filter_by(email=co_app_email).first()
+        if user is None:
+            raise InvalidUsage("co-applicants is malformed")
+        d = {
+            "co_user": user.id,
+            "propapp": application
+        }
+        attempt_insert(CoApplicants, d)
+
+def parse_collaborators(collabs, application):
+    for collab_info in collabs:
+        # Could check user existence?
+        email = collab_info.get('email')
+        d = {
+            **collab_info,
+            "propapp": application
+        }
+        attempt_insert(ApplicationCollaborators, d)
+
 @bp.route('/apply/<int:call_id>', methods=['POST'])
 def apply(call_id):
     post_request = request.get_json()
     if post_request:
-        return post_request_short(ProposalApplication, post_request, "Application Submitted")
+        co_apps = post_request.get("list_of_co_applicants")
+        collabs = post_request.get("list_of_collaborators")
 
-    resp = {
-        "status": "failure",
-        "message": "No JSON data provided"
-    }
-    return jsonify(resp), 400
+        post_request["list_of_co_applicants"] = []
+        post_request["list_of_collaborators"] = []
+        app = attempt_insert(ProposalApplication, post_request)
+        parse_co_applicants(co_apps, app)
+        parse_collaborators(collabs, app)
+        resp = {
+            "message": "Application submitted"
+        }
+        return jsonify(resp), 201
+    raise InvalidUsage("No JSON data provided")

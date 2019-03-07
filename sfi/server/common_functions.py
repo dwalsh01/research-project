@@ -1,5 +1,6 @@
 from flask import request, jsonify
 from sqlalchemy.exc import IntegrityError
+from sfi.server.errors.errors import InvalidUsage
 
 def post_request_full(model, success_message):
     ''' Saves a row to a table.
@@ -14,7 +15,7 @@ def post_request_full(model, success_message):
     post_request = request.get_json()
     if post_request:
         return post_request_short(model, post_request, success_message)
-    return jsonify({"status": "failure", "message": "no data provided"}), 400
+    raise InvalidUsage("No JSON data provided")
 
 def post_request_short(model, obj_data, success_message):
     ''' Saves a row to a table.
@@ -35,18 +36,33 @@ def post_request_short(model, obj_data, success_message):
         return jsonify(response), 201
 
     except IntegrityError as e:
-        short_error = e.orig.diag.message_primary
-        invalid_format = {
-            "status": "failure",
-            "message": "invalid format",
-            "error": short_error
-        }
-        return jsonify(invalid_format), 400
+        raise InvalidUsage(e.orig.diag.message_primary)
+
     except TypeError as et:
-        error = et
-        response = {
-            "status": "failure",
-            "message": "invalid format",
-            "error": str(error)
-        }
-        return jsonify(response), 400
+        raise InvalidUsage(str(error))
+
+def attempt_insert(model, obj_data):
+    ''' Attempts to insert and save a model.
+
+    '''
+    try:
+        data = model(**obj_data)
+        data.saveToDB()
+        return data
+
+    except IntegrityError as e:
+        raise InvalidUsage(e.orig.diag.message_primary)
+
+    except TypeError as error:
+        raise InvalidUsage(str(error))
+
+def attempt_save(model):
+    try:
+        model.saveToDB()
+        return model
+
+    except IntegrityError as e:
+        raise InvalidUsage(e.orig.diag.message_primary)
+
+    except TypeError as error:
+        raise InvalidUsage(str(error))
