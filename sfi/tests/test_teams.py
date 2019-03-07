@@ -2,7 +2,8 @@ from sfi.server.models import Teams, Users, Funding
 import json
 import random
 
-def test_teams(client, app):
+def test_teams(client, app, auth):
+    auth.login_researcher()
     start_date = ["2014-7-9", "2010-8-7", "2007-6-9", "2012-4-1"]
     end_date = ["2019-5-1", "2018-11-9", "2017-7-9", "2019-1-1"]
     name = ["A-Team", "S.E.A.L Team Ricks", "Umbrella Academy", "Justice League", "Avengers"]

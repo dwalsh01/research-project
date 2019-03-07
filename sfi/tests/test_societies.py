@@ -2,13 +2,16 @@ from sfi.server.models import Societies, Users
 import json
 import random
 
-def test_societies(client, app):
+def test_societies(client, app, auth):
+    auth.login_researcher()
     start_date = ["2014-7-9", "2010-8-7", "2007-6-9", "2012-4-1"]
     end_date = ["2019-5-1", "2018-11-9", "2017-7-9", "2019-1-1"]
-    society_name = ["California Botanical Society", "Cardiac Electrophysiology Society", "Chinese-American Chemical Society"]
+    society_name = ["California Botanical Society",
+                    "Cardiac Electrophysiology Society",
+                    "Chinese-American Chemical Society"]
     membership_type = [True, False]
     num_inserts = 5
-    
+
     for i in range(num_inserts):
         user_id = None
         with app.app_context():

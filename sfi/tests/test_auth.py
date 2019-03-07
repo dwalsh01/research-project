@@ -53,37 +53,37 @@ def test_register(client, app):
             assert query is not None and response.status_code == 201
 
 
-def test_admin_register(client, app):
+def test_insert_users(client, app):
 
+    f_name = ["Jeff", "Matthias"]
+    l_name = ["Jobs", "Wilson"]
+    job_title = ["SFI admin", "Test Researcher"]
+    prefix = ["Mr"]
+    suffix = ["PhD"]
 
-    f_name = ["Jeff"]
-    l_name = ["Jobs"]
-    job_title = "SFI admin"
-    prefix = "Mr"
-    suffix = "PhD"
+    email = ["admin@sfi.com", "researcher@sfi.com"]
+    roles = ["admin", "researcher"]
+    for i in range(2):
+        data = {
+            "f_name": random.choice(f_name),
+            "l_name": random.choice(l_name),
+            "job_title": random.choice(job_title),
+            "prefix":  random.choice(prefix),
+            "suffix": random.choice(suffix),
+            "phone": str(random.randint(0,999)) +"-"+ str(random.randint(0,9999999)),
+            "phone_ext": random.randint(0,999),
+            "email": email[i],
+            "password": "hashed"
+        }
+        with app.app_context():
+            # Initial check
+            query = Users.query.filter_by(email=email[i]).first()
+            if not query:
+                user_type = Role.query.filter_by(name=roles[i]).first()
+                data["roles"] = [user_type]
+                admin = Users(**data)
+                admin.saveToDB()
 
-    email = "admin@sfi.com"
+                query = Users.query.filter_by(email=email[i]).first()
+                assert query is not None
 
-    data = {
-        "f_name": random.choice(f_name),
-        "l_name": random.choice(l_name),
-        "job_title": random.choice(job_title),
-        "prefix":  random.choice(prefix),
-        "suffix": random.choice(suffix),
-        "phone": str(random.randint(0,999)) +"-"+ str(random.randint(0,9999999)),
-        "phone_ext": random.randint(0,999),
-        "email": email,
-        "password": "hashed"
-    }
-
-    with app.app_context():
-        # Initial check
-        query = Users.query.filter_by(email=email).first()
-        if not query:
-            user_type = Role.query.filter_by(name="admin").first()
-            data["roles"] = [user_type]
-            admin = Users(**data)
-            admin.saveToDB()
-
-            query = Users.query.filter_by(email=email).first()
-            assert query is not None

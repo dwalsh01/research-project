@@ -2,7 +2,8 @@ from sfi.server.models import Funding, Users
 import json
 import random
 
-def test_funding(client, app):
+def test_funding(client, app, auth):
+    auth.login_researcher()
     start_date = ["2014-7-9", "2010-8-7", "2007-6-9", "2012-4-1"]
     end_date = ["2019-5-1", "2018-11-9", "2017-7-9", "2019-1-1"]
     funding_body = ["AHRC", "BBSRC", "EPSRC", "ESRC"]

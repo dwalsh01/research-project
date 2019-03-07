@@ -2,7 +2,9 @@ from sfi.server.models import Awards, Users
 import json
 import random
 
-def test_awards(client, app):
+def test_awards(client, app, auth):
+    auth.login_researcher()
+
     degree = ["Associate's degree", "Bachelor's degree", "Master's degree", "Doctoral degree"]
     awarding_body = ["SFI", "IICT", "PYF", "JKLOL", "IDC", "IDK"]
     award_details = ["Award for staying awake", "Award for Excellence in Existence", "Award for Participation"]

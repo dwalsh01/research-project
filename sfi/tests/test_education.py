@@ -2,7 +2,8 @@ from sfi.server.models import Education, Users
 import json
 import random
 
-def test_education(client, app):
+def test_education(client, app, auth):
+    auth.login_researcher()
     degree = ["Associate's degree", "Bachelor's degree", "Master's degree", "Doctoral degree"]
     field_of_study = ["Computer Science", "Biology", "Chemistry", "Physics", "Engineering", "Mathematics"]
     institution = ["UCC", "UCD", "TCD", "DCU", "UL", "NUIG", "NUIM"]

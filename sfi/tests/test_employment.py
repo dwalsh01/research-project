@@ -2,7 +2,8 @@ from sfi.server.models import Employment, Users
 import json
 import random
 
-def test_employment(client, app):
+def test_employment(client, app, auth):
+    auth.login_researcher()
     institution = ["UCC", "UCD", "TCD", "DCU", "UL", "NUIG", "NUIM"]
     location = ["Cork", "Dublin", "Limerick", "Galway", "Maynooth"]
     num_inserts = 5
@@ -18,7 +19,6 @@ def test_employment(client, app):
                     user_id = ident
                     break
 
-        
         response = client.post(
             '/profile/employment',
             data=json.dumps({
