@@ -6,7 +6,7 @@ from passlib.hash import pbkdf2_sha256
 
 from .models import CoApplicants, ProposalApplication, ProposalApplicationSchema, Teams,TeamsSchema, \
 Users, UsersSchema, Education, EducationSchema, Role, Awards, AwardsSchema, Societies, SocietiesSchema,\
-Employment, EmploymentSchema, Funding, FundingSchema, ProposalThemes, ProposalThemesSchema
+Employment, EmploymentSchema, Funding, FundingSchema, ProposalThemes, ProposalThemesSchema, RoleSchema
 
 from sfi.utils import get_project_root
 from sfi.server.errors.errors import InvalidUsage
@@ -156,7 +156,7 @@ def add_education():
     post_request = request.get_json()
     if post_request:
         return post_request_short(Education, post_request, "Education added")
-    
+
     resp = {
         "status": "failure",
         "message": "No JSON data provided"
@@ -182,7 +182,7 @@ def add_awards():
     post_request = request.get_json()
     if post_request:
         return post_request_short(Awards, post_request, "Awards added")
-    
+
     resp = {
         "status": "failure",
         "message": "No JSON data provided"
@@ -207,7 +207,7 @@ def add_societies():
     post_request = request.get_json()
     if post_request:
         return post_request_short(Societies, post_request, "Societies added")
-    
+
     resp = {
         "status": "failure",
         "message": "No JSON data provided"
@@ -232,7 +232,7 @@ def add_employment():
     post_request = request.get_json()
     if post_request:
         return post_request_short(Employment, post_request, "Employment added")
-    
+
     resp = {
         "status": "failure",
         "message": "No JSON data provided"
@@ -257,7 +257,7 @@ def add_funding():
     post_request = request.get_json()
     if post_request:
         return post_request_short(Funding, post_request, "Funding added")
-    
+
     resp = {
         "status": "failure",
         "message": "No JSON data provided"
@@ -282,7 +282,7 @@ def add_team():
     post_request = request.get_json()
     if post_request:
         return post_request_short(Teams, post_request, "Teams added")
-    
+
     resp = {
         "status": "failure",
         "message": "No JSON data provided"
@@ -307,7 +307,7 @@ def add_co_applicants():
     post_request = request.get_json()
     if post_request:
         return post_request_short(CoApplicants, post_request, "Co-Applicants added")
-    
+
     resp = {
         "status": "failure",
         "message": "No JSON data provided"
@@ -332,7 +332,7 @@ def add_application():
     post_request = request.get_json()
     if post_request:
         return post_request_short(ProposalApplication, post_request, "Application added")
-    
+
     resp = {
         "status": "failure",
         "message": "No JSON data provided"

@@ -1,8 +1,7 @@
 from flask import Blueprint, request, jsonify
 from .models import NrpSchema, NrpArea
 from .common_functions import post_request_full
-from flask_user import roles_required
-
+from flask_login import login_required
 
 #
 from flask import send_from_directory, current_app, render_template, abort, flash
@@ -14,12 +13,12 @@ import os
 bp = Blueprint("admin", __name__, url_prefix="/api")
 
 @bp.route("/nrp", methods=["POST"])
-@roles_required('admin')
+@login_required
 def add_nrp():
     return post_request_full(NrpArea, "NRP added")
 
 @bp.route('/nrp', methods=['GET'])
-@roles_required('admin')
+@login_required
 def list_nrp():
     nrp = NrpArea.query.all()
     schema = NrpSchema(many=True)
