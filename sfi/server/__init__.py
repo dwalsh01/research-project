@@ -62,6 +62,9 @@ def app_factory(config_param='sfi.server.config.DevelopmentConfig'):
     from . import proposal
     app.register_blueprint(proposal.bp)
 
+    from . import reviews
+    app.register_blueprint(reviews.bp)
+
     from sfi.server import errors
     app.register_blueprint(errors.bp)
 

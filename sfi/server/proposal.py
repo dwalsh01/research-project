@@ -2,7 +2,7 @@ import os
 from flask import Blueprint, jsonify, request
 from flasgger import swag_from, validate
 from sfi.utils import get_project_root
-from flask_login import current_user
+from flask_login import current_user, login_required
 from .models import ProposalCall, LongProposalSchema, ShortProposalSchema, \
     ApplicationDraft, ApplicationDraftSchema, ProposalApplication, Users, \
     CoApplicants, ApplicationCollaborators, PendingReviews
@@ -125,7 +125,7 @@ def parse_co_applicants(co_apps, application):
 def parse_collaborators(collabs, application):
     for collab_info in collabs:
         email = collab_info.get('email')
-        user = Users.query.filter_by(email=co_app_email).first()
+        user = Users.query.filter_by(email=email).first()
         if user is None:
             raise InvalidUsage("collaborator(s) email doesn't exist")
         d = {
@@ -149,14 +149,22 @@ def assign_app_reviewers(app):
 
 
 @bp.route('/apply/<int:call_id>', methods=['POST'])
+@login_required
 def apply(call_id):
     post_request = request.get_json()
     if post_request:
+        uid = current_user.id
+        existing = ProposalApplication.query.filter_by(applicant=uid, proposal_id=call_id).first()
+        if existing:
+            raise InvalidUsage("Application already submitted, awaiting reviewing.")
+
         co_apps = post_request.get("list_of_co_applicants")
         collabs = post_request.get("list_of_collaborators")
 
         post_request["list_of_co_applicants"] = []
         post_request["list_of_collaborators"] = []
+        post_request["applicant"] = uid
+        post_request["proposal_id"] = call_id
         app = attempt_insert(ProposalApplication, post_request)
         parse_co_applicants(co_apps, app)
         parse_collaborators(collabs, app)
@@ -166,3 +174,4 @@ def apply(call_id):
         }
         return jsonify(resp), 201
     raise InvalidUsage("No JSON data provided")
+

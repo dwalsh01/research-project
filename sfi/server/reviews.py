@@ -1,10 +1,11 @@
 import os
 from flask import Blueprint, jsonify, request
-from .models import PendingReviews, PendingReviewsSchema
+from .models import PendingReviews, PendingReviewsSchema, \
+        ProposalApplication, ProposalApplicationSchema
 from flask_login import login_required, current_user
 from sfi.server.errors.errors import InvalidUsage
 
-bp = Blueprint('proposal', __name__, url_prefix="/reviews")
+bp = Blueprint('reviews', __name__, url_prefix="/reviews")
 
 '''
 Should list all of the reviews pending
@@ -24,9 +25,30 @@ the PendingReviews table
 @login_required
 def pending_reviews():
     uid = current_user.id
-    pendingreviews = PendingReviews.filter_by(reviewer_id=user_id)
-    if pendingreviews is None:
+    pending_reviews = PendingReviews.query.filter_by(reviewer_id=uid).all()
+    if len(pending_reviews) == 0:
         raise InvalidUsage("No reviews found", status_code=404)
-    schema = PendingReviewsSchema.dump(pending_reviews, many=True)
-    print(schema)
-    return schema.jsonify(pendingreview)
+
+    schema = PendingReviewsSchema(many=True).dump(pending_reviews)
+    resp = {
+        "reviews": schema.data
+    }
+    return jsonify(resp)
+
+@bp.route("/pending/<int:app_id>")
+@login_required
+def view_app(app_id):
+    uid = current_user.id
+    valid_user = PendingReviews.query.filter_by(reviewer_id=uid, app_id=app_id).first()
+    if valid_user is None:
+        raise InvalidUsage("Not authorised to access this page.", status_code=403)
+
+    app = ProposalApplication.query.filter_by(id=app_id).first()
+    if app is None:
+        raise InvalidUsage(f"App id {app_id} not found", status_code=404)
+
+    schema = ProposalApplicationSchema().dump(app)
+    resp = {
+        "app": schema.data
+    }
+    return jsonify(resp)
