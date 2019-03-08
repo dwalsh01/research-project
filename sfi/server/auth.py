@@ -290,32 +290,12 @@ def add_team():
     }
     return jsonify(resp), 400
 
-@bp.route('/co_applicants', methods=['GET'])
-@login_required
-def get_co_applicants():
-    user = current_user
-    existing = CoApplicants.query.filter_by(co_user=user.id).first()
-    if existing:
-        co_app_schema = CoApplicantsSchema()
-        co_app = co_app_schema.dump(existing)
-        return jsonify({"funding": co_app.data}), 200
-    else:
-        return jsonify({"message": "No Co-Applicant information available"})
 
-@bp.route('/co_applicants', methods=['POST'])
-@login_required
-def add_co_applicants():
-    post_request = request.get_json()
-    if post_request:
-        return post_request_short(CoApplicants, post_request, "Co-Applicants added")
 
-    resp = {
-        "status": "failure",
-        "message": "No JSON data provided"
-    }
-    return jsonify(resp), 400
 
-@bp.route('/application', methods=['GET'])
+
+
+@bp.route('/api/user/application', methods=['GET'])
 @login_required
 def get_application():
     user = current_user
@@ -325,20 +305,8 @@ def get_application():
         proposal_application = proposal_application_schema.dump(existing)
         return jsonify({"proposal_application": proposal_application.data}), 200
     else:
-        return jsonify({"message": "No Applicant information available"})
+        raise InvalidUsage("No applications available for this user", status_code=404)
 
-@bp.route('/application', methods=['POST'])
-@login_required
-def add_application():
-    post_request = request.get_json()
-    if post_request:
-        return post_request_short(ProposalApplication, post_request, "Application added")
-
-    resp = {
-        "status": "failure",
-        "message": "No JSON data provided"
-    }
-    return jsonify(resp), 400
 
 @bp.route('/proposal_themes', methods=['GET'])
 @login_required

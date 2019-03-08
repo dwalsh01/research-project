@@ -1,4 +1,5 @@
 from flask_sqlalchemy import Model, SQLAlchemy
+from sqlalchemy.schema import UniqueConstraint
 from passlib.hash import pbkdf2_sha256
 from flask_login import UserMixin
 from flask_marshmallow import Marshmallow
@@ -239,6 +240,9 @@ class NrpSchema(ma.ModelSchema):
 
 
 class ProposalApplication(db.Model, DBFunctions):
+    __table_args__ = (
+        UniqueConstraint('proposal_id', 'applicant'),
+    )
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
     proposal_id = db.Column(db.Integer, db.ForeignKey('proposal_call.id'), nullable=False)
     applicant = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
@@ -256,7 +260,6 @@ class ProposalApplication(db.Model, DBFunctions):
     lay_abstract = db.Column(db.Text, nullable=False)
     signed = db.Column(db.Boolean, nullable=False)
     files = db.relationship('ApplicationFiles', backref='propapp', lazy=True)
-
 
 class ApplicationFiles(FileStore, db.Model, DBFunctions):
     id = db.Column(db.Integer, unique=True, nullable=False, primary_key=True)
@@ -304,7 +307,11 @@ class PendingReviews(db.Model, DBFunctions):
 
 class PendingReviewsSchema(ma.ModelSchema):
     class Meta:
-        model = PendingReviews
+        fields = ("id",
+                  "app_id",
+                  "reviewer_id",
+                  "deadline"
+                  )
 
 '''
 
