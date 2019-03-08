@@ -54,20 +54,19 @@ def test_register(client, app):
 
 
 def test_insert_users(client, app):
-
-    f_name = ["Jeff", "Matthias"]
-    l_name = ["Jobs", "Wilson"]
-    job_title = ["SFI admin", "Test Researcher"]
+    f_name = ["Jeff", "Matthias", "Joe", "Al"]
+    l_name = ["Jobs", "Wilson", "Johnson", "Cal"]
+    job_title = ["SFI admin", "Test Researcher", "Test Reviewer 1", "Test Reviewer 2"]
     prefix = ["Mr"]
     suffix = ["PhD"]
 
-    email = ["admin@sfi.com", "researcher@sfi.com"]
-    roles = ["admin", "researcher"]
-    for i in range(2):
+    email = ["admin@sfi.com", "researcher@sfi.com", "reviewer1@sfi.com", "reviewer2@sfi.com"]
+    roles = ["admin", "researcher", "reviewer", "reviewer"]
+    for i in range(len(email)):
         data = {
             "f_name": random.choice(f_name),
             "l_name": random.choice(l_name),
-            "job_title": random.choice(job_title),
+            "job_title": job_title[i],
             "prefix":  random.choice(prefix),
             "suffix": random.choice(suffix),
             "phone": str(random.randint(0,999)) +"-"+ str(random.randint(0,9999999)),
