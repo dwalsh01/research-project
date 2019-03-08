@@ -33,11 +33,11 @@ def show_proposal(call_id):
 def add_proposal():
     post_request = request.get_json()
     if post_request:
-        post_request["amount_left"] = post_request.get('award_amount', 0)
-        return post_request_short(ProposalCall, post_request, "Proposal call added")
+        post_request["amount_left"] = 0
+        return post_request_short(ProposalCall, post_request, "Proposal Call Added")
 
     message = "No JSON data provided"
-    return InvalidUsage(message, status_code=400)
+    raise InvalidUsage(message, status_code=400)
 
 
 @bp.route('/apply/<int:call_id>/draft', methods=['POST'])
@@ -134,7 +134,7 @@ def apply(call_id):
     if post_request:
         co_apps = post_request.get("list_of_co_applicants")
         collabs = post_request.get("list_of_collaborators")
-
+        post_request['applicant'] = current_user.id
         post_request["list_of_co_applicants"] = []
         post_request["list_of_collaborators"] = []
         app = attempt_insert(ProposalApplication, post_request)

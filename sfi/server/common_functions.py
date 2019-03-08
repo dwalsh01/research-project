@@ -39,7 +39,7 @@ def post_request_short(model, obj_data, success_message):
         raise InvalidUsage(e.orig.diag.message_primary)
 
     except TypeError as et:
-        raise InvalidUsage(str(error))
+        raise InvalidUsage(str(et))
 
 def attempt_insert(model, obj_data):
     ''' Attempts to insert and save a model.

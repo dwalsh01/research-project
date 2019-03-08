@@ -21,6 +21,9 @@ class DBFunctions():
         db.session.add(self)
         db.session.commit()
 
+    def deleteFromDB(self):
+        db.session.delete(self)
+
     def saveMultipleToDB(self, other):
         db.session.add(self)
         db.session.add_all(other)

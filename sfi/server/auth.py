@@ -6,7 +6,7 @@ from passlib.hash import pbkdf2_sha256
 
 from .models import CoApplicants, ProposalApplication, ProposalApplicationSchema, Teams,TeamsSchema, \
 Users, UsersSchema, Education, EducationSchema, Role, Awards, AwardsSchema, Societies, SocietiesSchema,\
-Employment, EmploymentSchema, Funding, FundingSchema, ProposalThemes, ProposalThemesSchema, RoleSchema
+Employment, EmploymentSchema, Funding, FundingSchema, ProposalThemes, ProposalThemesSchema, RoleSchema, CoApplicantsSchema
 
 from sfi.utils import get_project_root
 from sfi.server.errors.errors import InvalidUsage
@@ -154,6 +154,7 @@ def get_education():
 @login_required
 def add_education():
     post_request = request.get_json()
+    post_request['user_id'] = current_user.id
     if post_request:
         return post_request_short(Education, post_request, "Education added")
 
@@ -357,7 +358,7 @@ def add_proposal_themes():
     post_request = request.get_json()
     if post_request:
         return post_request_short(ProposalThemes, post_request, "Application added")
-    
+
     resp = {
         "status": "failure",
         "message": "No JSON data provided"
