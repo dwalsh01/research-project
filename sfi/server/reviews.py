@@ -21,9 +21,10 @@ JSON of:
 the PendingReviews table
 
 '''
-@bp.route('/pending')
+@bp.route('/pending', methods=['GET'])
 @login_required
 def pending_reviews():
+    print("route hit")
     uid = current_user.id
     pending_reviews = PendingReviews.query.filter_by(reviewer_id=uid).all()
     if len(pending_reviews) == 0:

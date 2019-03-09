@@ -5,7 +5,7 @@ from sfi.utils import get_project_root
 from flask_login import current_user, login_required
 from .models import ProposalCall, LongProposalSchema, ShortProposalSchema, \
     ApplicationDraft, ApplicationDraftSchema, ProposalApplication, Users, \
-    CoApplicants, ApplicationCollaborators, PendingReviews
+    CoApplicants, ApplicationCollaborators, PendingReviews,ProposalApplicationSchema
 
 from .common_functions import post_request_short, attempt_insert
 from sfi.server.errors.errors import InvalidUsage
@@ -146,6 +146,25 @@ def assign_app_reviewers(app):
             "deadline": deadline
         }
         attempt_insert(PendingReviews, data)
+
+
+@bp.route('/apply/get/<int:call_id>', methods=['GET'])
+@login_required
+def get_application(call_id):
+    print(call_id)
+    existing = ProposalApplication.query.filter_by(id=call_id).first()
+    if existing:
+        print('exists')
+        data = ProposalApplicationSchema().dump(existing)
+        return jsonify(data.data), 200
+    else:
+        return jsonify({"message": "no proposal found"}), 200
+    resp = {
+        "status": "failure",
+        "message": "Please log-in"
+    }
+    return jsonify(resp), 400
+
 
 
 @bp.route('/apply/<int:call_id>', methods=['POST'])
