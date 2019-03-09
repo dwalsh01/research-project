@@ -6,7 +6,8 @@ from passlib.hash import pbkdf2_sha256
 
 from .models import CoApplicants, ProposalApplication, ProposalApplicationSchema, Teams,TeamsSchema, \
 Users, UsersSchema, Education, EducationSchema, Role, Awards, AwardsSchema, Societies, SocietiesSchema,\
-Employment, EmploymentSchema, Funding, FundingSchema, ProposalThemes, ProposalThemesSchema, RoleSchema, CoApplicantsSchema
+Employment, EmploymentSchema, Funding, FundingSchema, ProposalThemes, ProposalThemesSchema, RoleSchema,\
+CoApplicantsSchema, RCTeamMembers, RCTeamMembersSchema, RCTeam, RCTeamSchema
 
 from sfi.utils import get_project_root
 from sfi.server.errors.errors import InvalidUsage
@@ -110,7 +111,7 @@ def current():
 @swag_from(swagger_auth, methods=['POST'])
 def register():
     post_request = request.get_json()
-    validate(post_request, 'Researcher', swagger_auth)
+    #validate(post_request, 'Researcher', swagger_auth)
     existing = Users.query.filter_by(email=post_request.get('email')).first()
 
     if not existing:
@@ -332,3 +333,38 @@ def add_proposal_themes():
         "message": "No JSON data provided"
     }
     return jsonify(resp), 400
+
+
+@bp.route('/rc_team', methods=['GET'])
+@login_required
+def get_rc_team():
+    '''
+    Search RCTeamMembers for team_member = current_user.id
+    from that, you get the team_id
+
+    query RCTeam teamid = teamid
+    '''
+    user = current_user
+    lst = []
+    members = RCTeamMembers.query.filter_by(team_member=user.id).all()
+    for member in members:
+        lst.append(member.team_id)
+    existing = [RCTeam.query.filter_by(team_id=ident).one() for ident in lst]
+    if existing:
+        rc_team_schema = RCTeamSchema(many=True)
+        rc_team = rc_team_schema.dump(existing)
+        return jsonify({"rc_team": rc_team.data}), 200
+    else:
+        raise InvalidUsage("No RC Team information available", status_code=404)
+
+@bp.route('/rc_team_members', methods=['GET'])
+@login_required
+def get_rc_team_members():
+    user = current_user
+    existing = RCTeamMembers.query.filter_by(team_member=user.id).all()
+    if existing:
+        rc_team_members_schema = RCTeamMembersSchema(many=True)
+        rc_team_members = rc_team_members_schema.dump(existing)
+        return jsonify({"rc_team": rc_team_members.data}), 200
+    else:
+        raise InvalidUsage("No RC Team Members information available", status_code=404)
