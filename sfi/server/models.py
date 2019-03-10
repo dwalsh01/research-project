@@ -203,10 +203,10 @@ class ProposalCall(db.Model, DBFunctions):
     start_date_end = db.Column(db.Date())
     contact = db.Column(db.String(75), nullable=False)
 
-#class ProposalThemes(db.Model, DBFunctions):
-#    id = db.Column(db.Integer, primary_key=True)
-#    prop_id = db.Column(db.Integer, db.ForeignKey('proposal_call.id'), nullable=False)
-#    theme_name = db.Column(db.String(100), nullable=False, unique=True)
+class ProposalThemes(db.Model, DBFunctions):
+    id = db.Column(db.Integer, primary_key=True)
+    prop_id = db.Column(db.Integer, db.ForeignKey('proposal_call.id'), nullable=False)
+    theme_name = db.Column(db.String(100), nullable=False, unique=True)
 
 class ProposalCallFiles(FileStore, db.Model, DBFunctions):
     id = db.Column(db.Integer, primary_key=True)

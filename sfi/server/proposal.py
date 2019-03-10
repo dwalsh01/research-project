@@ -193,4 +193,3 @@ def apply(call_id):
         }
         return jsonify(resp), 201
     raise InvalidUsage("No JSON data provided")
-

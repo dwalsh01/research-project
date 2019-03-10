@@ -5,6 +5,7 @@ from .models import PendingReviews, PendingReviewsSchema, \
         Reviews, Themes
 from flask_login import login_required, current_user
 from sfi.server.errors.errors import InvalidUsage
+from .common_functions import attempt_insert
 
 bp = Blueprint('reviews', __name__, url_prefix="/reviews")
 
@@ -67,7 +68,7 @@ def add_review(app_id):
     rating = request_data.get("rating", '')
 
     r_data = {
-        "rating": rating
+        "rating": rating,
         "app_id": app_id
     }
     review = attempt_insert(Reviews, r_data)
