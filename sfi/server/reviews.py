@@ -58,14 +58,24 @@ def view_app(app_id):
     return jsonify(resp)
 
 
-@bp.route('/add/<int:app_id>')
+@bp.route('/add/<int:app_id>', methods=['POST'])
 @login_required
 def add_review(app_id):
     uid = current_user.id
-    valid_to_review(uid, app_id)
+    #valid_to_review(uid, app_id)
 
     request_data = request.get_json()
-    rating = request_data.get("rating", '')
+    rating = request_data.get("rating", None)
+    if rating is None:
+        raise InvalidUsage("Please provide a rating")
+
+    themes = ["quality", "importance", "impact"]
+    theme_data = []
+    for theme in themes:
+        data = request_data.get(theme, None)
+        if data is None:
+            raise InvalidUsage("Please provide theme: {}".format(theme))
+        theme_data.append(data)
 
     r_data = {
         "rating": rating,
@@ -74,13 +84,15 @@ def add_review(app_id):
     review = attempt_insert(Reviews, r_data)
 
     themes = ["quality", "importance", "impact"]
-    for theme in themes:
-        data = request.get(theme, '')
-        theme_data = {
+    for i,theme in enumerate(themes):
+        data = {
             "theme_name": theme,
-            "theme_critique": data,
+            "theme_critique": theme_data[i],
             "review": review
         }
-        attempt_insert(Themes, theme_data)
+        attempt_insert(Themes, data)
 
-
+    resp = {
+        "message": "Review submitted"
+    }
+    return jsonify(resp), 201
