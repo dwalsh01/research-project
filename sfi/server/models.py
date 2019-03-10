@@ -32,7 +32,7 @@ class DBFunctions():
 
 class FileStore:
     filename = db.Column(db.String(100), nullable=False)
-    file_data = db.Column(db.LargeBinary, nullable=False)
+    loc_on_disk = db.Column(db.String(200), nullable=False)
 
 '''
 Users section:
@@ -203,10 +203,10 @@ class ProposalCall(db.Model, DBFunctions):
     start_date_end = db.Column(db.Date())
     contact = db.Column(db.String(75), nullable=False)
 
-class ProposalThemes(db.Model, DBFunctions):
-    id = db.Column(db.Integer, primary_key=True)
-    prop_id = db.Column(db.Integer, db.ForeignKey('proposal_call.id'), nullable=False)
-    theme_name = db.Column(db.String(100), nullable=False, unique=True)
+#class ProposalThemes(db.Model, DBFunctions):
+#    id = db.Column(db.Integer, primary_key=True)
+#    prop_id = db.Column(db.Integer, db.ForeignKey('proposal_call.id'), nullable=False)
+#    theme_name = db.Column(db.String(100), nullable=False, unique=True)
 
 class ProposalCallFiles(FileStore, db.Model, DBFunctions):
     id = db.Column(db.Integer, primary_key=True)
@@ -291,13 +291,13 @@ class Reviews(db.Model, DBFunctions):
     id = db.Column(db.Integer, primary_key=True)
     app_id = db.Column(db.Integer, db.ForeignKey('proposal_application.id'), nullable=False)
     themes = db.relationship('Themes', backref='review', lazy=True)
+    rating = db.Column(db.Integer, nullable=False)
 
 class Themes(db.Model, DBFunctions):
     id = db.Column(db.Integer, primary_key=True)
     review_id = db.Column(db.Integer, db.ForeignKey('reviews.id'), nullable=False)
     theme_critique = db.Column(db.Text, nullable=False)
-    theme_name = db.Column(db.String(100), db.ForeignKey('proposal_themes.theme_name'), nullable=False)
-    theme_rating = db.Column(db.Integer, nullable=False)
+    theme_name = db.Column(db.String(100), nullable=False)
 
 class PendingReviews(db.Model, DBFunctions):
     id = db.Column(db.Integer, primary_key=True)
