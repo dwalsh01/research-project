@@ -2,7 +2,7 @@ import os
 from flask import Blueprint, jsonify, request
 from .models import PendingReviews, PendingReviewsSchema, \
         ProposalApplication, ProposalApplicationSchema, \
-        Reviews, Themes
+        Reviews, Themes, ReviewsSchema
 from flask_login import login_required, current_user
 from sfi.server.errors.errors import InvalidUsage
 from .common_functions import attempt_insert
@@ -96,3 +96,17 @@ def add_review(app_id):
         "message": "Review submitted"
     }
     return jsonify(resp), 201
+
+@bp.route('/all')
+def list_reviews():
+    reviews = Reviews.query.all()
+    review_dump = ReviewsSchema(many=True).dump(reviews)
+    if review_dump:
+        reviews = review_dump[0]
+        for i,review in enumerate(reviews):
+            app_id = review["app_id"]
+            app = ProposalApplication.query.filter_by(id=app_id).first()
+            prop_id = app.proposal_id
+            reviews[i]["prop_id"] = prop_id
+        return jsonify(reviews)
+    return InvalidUsage("No Data available", status_code=404)

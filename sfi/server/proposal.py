@@ -193,3 +193,8 @@ def apply(call_id):
         }
         return jsonify(resp), 201
     raise InvalidUsage("No JSON data provided")
+
+@bp.route('/application/<int:app-id>/accept')
+def accept_app(app_id):
+    pass
+

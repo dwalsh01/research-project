@@ -365,7 +365,9 @@ class ThemesSchema(ma.ModelSchema):
 
 class ReviewsSchema(ma.ModelSchema):
     class Meta:
-        model = Reviews
+        fields = ('id', 'app_id', 'rating', 'themes')
+
+    themes = ma.Nested(ThemesSchema, many=True)
 
 class ApplicationCollaboratorsSchema(ma.ModelSchema):
     class Meta:
