@@ -97,7 +97,7 @@ def add_review(app_id):
     }
     return jsonify(resp), 201
 
-@bp.route('/all')
+@bp.route('/all', methods=['GET'])
 def list_reviews():
     reviews = Reviews.query.all()
     review_dump = ReviewsSchema(many=True).dump(reviews)
