@@ -50,8 +50,5 @@ yarn-error.log*
 # "in theory" you'd hide sendgrid info
 sendgrid.env
 
-# Too messy for now
-migrations/
-
 # hide uploads
 UPLOAD_FOLDER/

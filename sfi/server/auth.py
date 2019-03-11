@@ -156,6 +156,10 @@ def get_education():
 def add_education():
     post_request = request.get_json()
     post_request['user_id'] = current_user.id
+    existing = Education.query.filter_by(user_id=current_user.id).first()
+    if existing:
+        return '', 304
+
     if post_request:
         return post_request_short(Education, post_request, "Education added")
 

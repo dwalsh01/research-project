@@ -49,9 +49,6 @@ def app_factory(config_param='sfi.server.config.DevelopmentConfig'):
     app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
     #Blueprints
-    from . import playground
-    app.register_blueprint(playground.bp)
-
     from . import auth
     auth.login_manager.init_app(app)
     app.register_blueprint(auth.bp)

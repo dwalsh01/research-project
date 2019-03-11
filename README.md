@@ -1,10 +1,49 @@
 # Research Project for 3rd Year Computer Science Module
 
-## Aims
+To access a hosted version of this repository, please visit
 
-1. Improve upon the current system in place.
-2. Increase our understanding of software engineering practices and procedures.
-3. Learn about new frameworks and improve our understanding of technology we are familiar with.
+[Hosted version of the website](https://flask-sfi.herokuapp.com/)
+
+# Streamlined set up guide
+
+### Install prerequisites
+
+- Git
+- Python
+- npm (node)
+- Postgresql
+
+### Activate and create your virtual environment
+
+    ```bash
+    python -m venv venv
+    source venv/bin/activate
+    ```
+
+### Start up postgresql and create a database "research_dev"
+
+    ```bash
+        For example you could run the following in a terminal;
+        psql -h localhost -U user_name
+
+        create database research_dev;
+    ```
+
+### Run the first-time setup script
+
+    ```bash
+    ./first-time-setup.sh
+
+    ```
+
+### Finally, run the app
+
+    ```bash
+        flask run
+    ```
+
+
+# Old/manual version
 
 ## Running the app
 
@@ -25,7 +64,7 @@
         flask run
     ```
 
-## Installation guide
+## Installation guide (Setup guide)
 
 1. Download & Install python/git/npm (if you haven't already)
 
@@ -102,9 +141,9 @@
 
 6. Setting up the postgres db:
 
-   - Should you already have tables setup via the above command from a previous pull, you must first delete those tables with a "drop tables" command or via your UI of choice
-   - Ensure you have a db runing locally called "research_dev"
-   - Then DELETE the migrations folder, and run the following commands (within virtual env)
+   - Install postgresql
+   - Create a database called "research_dev"
+   - Ensure you have a db running locally called "research_dev"
 
    ```bash
        flask db init
@@ -126,7 +165,3 @@
    ```bash
        flask run
    ```
-
-## Conclusion
-
-Should there be any queries please contact me
