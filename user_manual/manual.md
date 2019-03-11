@@ -93,6 +93,10 @@ If you select a ticked box it will hide the field in the table.
 
 If you select the download icon in the top right of the table it will download the currently displayed proposals.
 
+### Search bar
+
+If you type in the search bar it will filter the proposals accordingly.
+
 ### Display More Proposals
 
 ![Sidebar](./photos/proposals.png)
@@ -162,4 +166,33 @@ If you saved an application as a draft it will appear here.
 
 ## Sidebar Researcher
 
-If you are lo
+If you have the user role of a researcher this is the following sidebar you will see upon login:
+
+![Sidebar](./photos/reviewer_sidebar.png)
+
+Upon selecting Respond to applications you will be taken to the respond page.
+
+## Respond Page
+
+![Sidebar](./photos/review.png)
+
+The table shown has the same filter options as the proposals page.
+
+Once you **select** an option from the list a form will appear below the table (_see below_) with more information from the application sent in.
+
+![Sidebar](./photos/reviewer_form.png)
+
+Once you fill out the form the submission button will be enabled and upon successful submission you will see the following notification:
+
+![Sidebar](./photos/submit_reviewer.png)
+
+## Admin
+
+If you login to the application as an administrator you will get the ability to add a proposal. (_See below_)
+
+![Sidebar](./photos/create_proposal1.png)
+![Sidebar](./photos/create_proposal2.png)
+
+Once you have filled out everything on this form you will get to submit the form.
+
+![Sidebar](./photos/success_review.png)
